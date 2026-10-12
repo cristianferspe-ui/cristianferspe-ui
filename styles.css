@@ -104,11 +104,43 @@ h3 { font-size: 18px; margin: 0; }
 .contact .lead { margin-bottom: 20px; }
 .foot { padding: 32px 16px 48px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
 
+/* Página de proyecto */
+.case-hero h1 { font-size: clamp(30px, 5.5vw, 46px); }
+.back { color: inherit; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+.stats-4 { grid-template-columns: repeat(4, 1fr); }
+.facts { margin: 16px 0 0; padding-left: 20px; max-width: 760px; }
+.facts li { margin-bottom: 8px; }
+.facts li::marker { color: var(--accent); }
+.note { color: var(--muted); font-size: 14px; margin: 14px 0 0; }
+figure { margin: 28px 0 0; }
+figure img { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--line); background: #fff; }
+figure.narrow { max-width: 640px; }
+figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; }
+.cards.three { grid-template-columns: repeat(3, 1fr); margin-top: 28px; }
+.card h3 { font-size: 17px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.split h3 { margin-bottom: 4px; }
+.sub-h { margin-top: 36px; }
+.chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.chips li { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 14px; font-size: 14px; }
+.project-link { display: inline-block; margin-top: 6px; font-weight: 600; }
+
+/* Certificaciones */
+.certs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.certs .card ul { list-style: none; padding: 0; margin: 10px 0 0; }
+.certs .card li { padding: 8px 0; border-top: 1px solid var(--line); font-size: 15px; display: flex; justify-content: space-between; gap: 12px; }
+.certs .card li:first-child { border-top: 0; }
+.certs .card li span { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.certs-note { color: var(--muted); font-size: 14px; margin: 16px 0 0; }
+
 @media (max-width: 760px) {
   .nav nav { display: none; }
   .theme { margin-left: auto; }
   .hero { padding-top: 56px; }
-  .stats, .cards, .skills { grid-template-columns: 1fr; }
+  .stats, .stats-4, .cards, .cards.three, .skills, .split, .certs { grid-template-columns: 1fr; }
   .item-head { flex-direction: column; gap: 0; }
   .date { padding: 0 0 6px; }
+  .stats-4 { grid-template-columns: 1fr 1fr; }
+  .certs .card li { flex-direction: column; gap: 2px; }
 }
