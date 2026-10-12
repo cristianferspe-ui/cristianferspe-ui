@@ -1,9 +1,11 @@
-# Sitio personal · Cristianfer Silva Portillo
+# Cristianfer Silva Portillo
 
-Portafolio profesional publicado con GitHub Pages.
+Técnico Troubleshooter de turbinas eólicas Siemens G2.101 · Estudiante de Ingeniería en Automatización y Control Industrial · Coquimbo, Chile
 
-- `index.html`: contenido
-- `styles.css`: diseño (claro/oscuro)
-- `CV_Cristianfer_Silva_Portillo.pdf`: CV público (sin RUT ni teléfono)
+🌐 **Sitio web:** https://cristianferspe-ui.github.io/cristianferspe-ui/
+💼 **LinkedIn:** https://www.linkedin.com/in/cristianfer-silva-portillo-454216184
+✉️ cristianferspe@gmail.com
 
-Para actualizar: edita los archivos, haz commit y `git push`. GitHub Pages publica en 1–2 minutos.
+---
+
+Este repositorio contiene el sitio, publicado con GitHub Pages: `index.html` (contenido), `styles.css` (diseño) y el CV en PDF. Para actualizarlo, edita, haz commit y `git push`.
