@@ -95,6 +95,12 @@ h3 { font-size: 18px; margin: 0; }
 .skills p { margin: 0; color: var(--muted); font-size: 15px; }
 .langs { margin: 20px 0 0; color: var(--muted); }
 
+.downloads { margin-top: 20px; }
+.downloads .card { display: flex; flex-direction: column; }
+.downloads .card p { flex: 1; }
+.downloads .badge { align-self: flex-start; }
+.downloads .cta { margin-top: 16px; }
+
 .contact .lead { margin-bottom: 20px; }
 .foot { padding: 32px 16px 48px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
 
