@@ -56,6 +56,8 @@ h1 { font-size: clamp(36px, 7vw, 60px); line-height: 1.05; margin: 0 0 14px; let
   text-decoration: none; border: 1px solid var(--line); color: var(--text); background: var(--surface);
 }
 .btn:hover { border-color: var(--accent); }
+.btn.wa { background: #25d366; border-color: #25d366; color: #06301a; }
+.btn.wa:hover { filter: brightness(1.06); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 :root[data-theme="dark"] .btn.primary { color: #06181c; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #06181c; } }

@@ -114,6 +114,8 @@
     <p class="lead">¿Tienes una oportunidad en operaciones, mantenimiento o automatización? Escríbeme.</p>
     <div class="cta">
       <a class="btn primary" href="mailto:cristianferspe@gmail.com">cristianferspe@gmail.com</a>
+      <a class="btn wa" href="#contacto" id="wa" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn" href="#contacto" id="tel">Teléfono</a>
       <a class="btn" href="https://www.linkedin.com/in/cristianfer-silva-portillo-454216184" target="_blank" rel="noopener" id="linkedin">LinkedIn</a>
     </div>
   </section>
@@ -130,6 +132,13 @@
     try { localStorage.setItem('theme', r.dataset.theme); } catch (e) {}
   };
   document.getElementById('y').textContent = new Date().getFullYear();
+  // El número se arma aquí para que no quede en texto plano en el HTML (menos spam de bots)
+  const n = ['56', '9', '3414', '4545'];
+  const msg = encodeURIComponent('Hola Cristianfer, vi tu sitio web y me gustaría conversar sobre una oportunidad.');
+  document.getElementById('wa').href = 'https://wa.me/' + n.join('') + '?text=' + msg;
+  const tel = document.getElementById('tel');
+  tel.href = 'tel:+' + n.join('');
+  tel.textContent = '+' + n.join(' ');
 </script>
 </body>
 </html>
