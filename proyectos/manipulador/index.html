@@ -11,173 +11,306 @@
 <meta property="og:url" content="https://cristianferspe-ui.github.io/cristianferspe-ui/proyectos/manipulador/">
 <meta property="og:image" content="https://cristianferspe-ui.github.io/cristianferspe-ui/proyectos/manipulador/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230f7487'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='white' text-anchor='middle'>CS</text></svg>">
-<link rel="stylesheet" href="../../styles.css">
+<meta name="theme-color" content="#0f7487">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230f7487'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='white' text-anchor='middle'>CS</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../../styles.css?v=20261014">
+<script>
+  try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<script defer src="../../main.js?v=20261014"></script>
 </head>
 <body>
+<a class="skip" href="#problema">Saltar al contenido</a>
+<div class="progress" aria-hidden="true"><span data-progress></span></div>
+
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="logo" href="../../">CS<span>.</span></a>
-    <nav>
-      <a href="#problema">Problema</a>
-      <a href="#solucion">Solución</a>
-      <a href="#control">Control y seguridad</a>
-      <a href="#validacion">Validación</a>
-      <a href="#pruebalo">Pruébalo</a>
+    <a class="logo" href="../../" aria-label="Volver al perfil">CS<span>.</span></a>
+    <nav class="nav-links" aria-label="Secciones del caso">
+      <a href="#problema"><span>01</span>Problema</a>
+      <a href="#solucion"><span>02</span>Solución</a>
+      <a href="#control"><span>03</span>Control y seguridad</a>
+      <a href="#validacion"><span>04</span>Validación</a>
+      <a href="#pruebalo"><span>05</span>Pruébalo</a>
     </nav>
-    <button class="theme" id="theme" aria-label="Cambiar tema">◐</button>
+    <button class="icon-btn theme" id="theme" type="button" aria-label="Cambiar tema claro u oscuro">◐</button>
+    <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu"><i></i></button>
   </div>
 </header>
 
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <nav aria-label="Menú móvil">
+    <a href="#problema"><span>01</span>Problema</a>
+    <a href="#solucion"><span>02</span>Solución</a>
+    <a href="#control"><span>03</span>Control y seguridad</a>
+    <a href="#validacion"><span>04</span>Validación</a>
+    <a href="#pruebalo"><span>05</span>Pruébalo</a>
+    <a href="../../"><span>←</span>Volver al perfil</a>
+  </nav>
+  <div class="menu-foot">
+    <a class="btn primary sm" href="https://wokwi.com/projects/477671830161685505" target="_blank" rel="noopener">Abrir en Wokwi</a>
+    <a class="btn sm" href="../../#contacto">Contactar</a>
+  </div>
+</div>
+
 <main>
-  <section class="hero wrap case-hero">
-    <p class="eyebrow"><a class="back" href="../../#proyectos">← Volver al perfil</a> · Proyecto académico · AIEP · 2026</p>
-    <h1>Manipulador neumático de 2 ejes con control PLC</h1>
-    <p class="intro">Diseño completo de un manipulador cartesiano que automatiza el traslado de piezas entre un torno CNC y una estación de inspección: requerimientos, mecánica, neumática, control secuencial, cadena de seguridad y validación en simulación.</p>
-    <div class="cta">
-      <a class="btn primary" href="https://wokwi.com/projects/477671830161685505" target="_blank" rel="noopener" data-goatcounter-click="wokwi-hero">Probar la simulación en Wokwi</a>
-      <!-- REPOSITORIO: cuando el proyecto esté en GitHub, descomentar y poner la URL
-      <a class="btn" href="https://github.com/cristianferspe-ui/NOMBRE-REPO" target="_blank" rel="noopener">Ver el repositorio</a>
-      -->
-    </div>
-    <ul class="stats stats-4">
-      <li><strong>5,27 s</strong><span>ciclo simulado (objetivo ≤ 8 s)</span></li>
-      <li><strong>±0,005 s</strong><span>dispersión en 10 ciclos</span></li>
-      <li><strong>72 / 72</strong><span>pruebas de lógica superadas</span></li>
-      <li><strong>12</strong><span>escenarios de falla simulados</span></li>
-    </ul>
-  </section>
-
-  <section id="problema" class="wrap section">
-    <h2>1 · El problema</h2>
-    <p class="lead">En una célula de mecanizado, un operador traslada a mano cada pieza de acero (Ø50 × 60 mm, 0,93 kg) desde el torno hasta la inspección, a 400 mm de distancia.</p>
-    <ul class="facts">
-      <li><strong>18 ± 4 s</strong> por traslado: cerca del 30 % del ciclo de la célula, sin agregar valor.</li>
-      <li><strong>2 % de piezas dañadas</strong> por manipulación.</li>
-      <li><strong>Riesgo ergonómico:</strong> movimiento repetitivo con carga, aristas vivas y pieza caliente.</li>
-    </ul>
-    <p class="note">Datos del caso de estudio planteado en la asignatura Diseño de Sistemas Mecatrónicos.</p>
-  </section>
-
-  <section id="solucion" class="wrap section">
-    <h2>2 · La solución</h2>
-    <p class="lead">Un manipulador cartesiano sobre pórtico de aluminio: un cilindro horizontal (eje X, Ø32 × 400) mueve un carro guiado, del que cuelga un cilindro guiado vertical (eje Z, Ø25 × 150) con una pinza paralela de mordazas en V.</p>
-    <figure>
-      <img src="img/plano_autocad.png" alt="Plano general del manipulador en AutoCAD, vistas en elevación y planta con cotas, trayectorias y zonas de movimiento" loading="lazy" width="1600" height="1347">
-      <figcaption>Plano general en AutoCAD: elevación y planta, carreras, sensores, trayectoria del ciclo y zona protegida.</figcaption>
-    </figure>
-    <div class="cards three">
-      <article class="card"><h3>Requerimientos trazables</h3><p>26 requerimientos funcionales, de desempeño, seguridad, restricción e interfaz, cada uno vinculado a un componente y a una prueba.</p></article>
-      <article class="card"><h3>Dimensionamiento</h3><p>Fuerza de agarre de 168 N con factor de seguridad 2, verificada también a 5 bar; consumo de aire de 6,8 NL por ciclo.</p></article>
-      <article class="card"><h3>Decisión clave</h3><p>Control por PLC en lugar de neumática pura: permite contar piezas, diagnosticar fallas, enclavar movimientos y operar paso a paso.</p></article>
-    </div>
-  </section>
-
-  <section id="control" class="wrap section">
-    <h2>3 · Control y seguridad</h2>
-    <div class="split">
-      <div>
-        <h3>Control secuencial</h3>
-        <ul class="facts">
-          <li><strong>GRAFCET (IEC 60848)</strong> de 10 etapas que ejecuta la secuencia B+ C+ B− A+ B+ C− B− A−.</li>
-          <li>Ninguna etapa avanza sin que el sensor confirme el movimiento anterior.</li>
-          <li><strong>8 enclavamientos</strong> (E‑01 a E‑08): presión baja, nido ocupado, fallo de agarre, apertura fuera de destino, emergencia, vigilancia de tiempo y caída de presión.</li>
-          <li>Modo manual paso a paso y rearme supervisado.</li>
-        </ul>
+  <section class="hero blueprint case-hero" data-hero>
+    <div class="wrap hero-inner">
+      <div class="hero-text">
+        <p class="crumbs rise" style="--d:0"><a href="../../">Perfil</a> / <a href="../../#proyectos">Proyectos</a> / <b>Manipulador</b></p>
+        <p class="kicker rise" style="--d:0">Proyecto académico · AIEP · 2026</p>
+        <h1 class="rise" style="--d:1">Manipulador neumático de 2 ejes con control PLC</h1>
+        <p class="intro rise" style="--d:2">Diseño completo de un manipulador cartesiano que automatiza el traslado de piezas entre un torno CNC y una estación de inspección: requerimientos, mecánica, neumática, control secuencial, cadena de seguridad y validación en simulación.</p>
+        <div class="cta rise" style="--d:3">
+          <a class="btn primary" href="https://wokwi.com/projects/477671830161685505" target="_blank" rel="noopener" data-goatcounter-click="wokwi-hero">Probar la simulación en Wokwi <span class="arr">↗</span></a>
+          <!-- REPOSITORIO: cuando el proyecto esté en GitHub, descomentar y poner la URL
+          <a class="btn" href="https://github.com/cristianferspe-ui/NOMBRE-REPO" target="_blank" rel="noopener">Ver el repositorio</a>
+          -->
+        </div>
       </div>
-      <div>
-        <h3>Seguridad independiente del PLC</h3>
-        <ul class="facts">
-          <li>Seta de emergencia y puerta enclavada en serie sobre un <strong>relé de seguridad de 2 canales</strong>.</li>
-          <li><strong>Parada de categoría 0:</strong> corta las bobinas y descarga el aire sin depender del programa.</li>
-          <li>Antirretornos pilotados para que la pieza no caiga ante pérdida de presión.</li>
-          <li>Bloqueo y consignación para mantenimiento.</li>
-        </ul>
+      <div class="hero-art rise" style="--d:3">
+        <dl class="titleblock">
+          <div class="tb-head">Ficha técnica</div>
+          <div class="row"><dt>Equipo</dt><dd>Manipulador cartesiano de 2 ejes</dd></div>
+          <div class="row"><dt>Eje X</dt><dd>Cilindro Ø32 × 400 mm</dd></div>
+          <div class="row"><dt>Eje Z</dt><dd>Cilindro guiado Ø25 × 150 mm</dd></div>
+          <div class="row"><dt>Pieza</dt><dd>Acero Ø50 × 60 mm · 0,93 kg</dd></div>
+          <div class="row"><dt>Control</dt><dd>PLC · GRAFCET de 10 etapas</dd></div>
+          <div class="row"><dt>Seguridad</dt><dd>Relé de 2 canales · parada cat. 0</dd></div>
+          <div class="row"><dt>Validación</dt><dd>Python + Wokwi</dd></div>
+        </dl>
       </div>
     </div>
-    <figure>
-      <img src="img/esquema_seguridad.png" alt="Esquema eléctrico de la cadena de seguridad con relé K0, seta S0 y puerta SP" loading="lazy" width="1600" height="948">
-      <figcaption>Cadena de seguridad en QElectroTech (IEC 60617): S0 y SP en serie sobre los dos canales del relé K0, con rearme manual.</figcaption>
-    </figure>
-  </section>
 
-  <section id="validacion" class="wrap section">
-    <h2>4 · Validación en simulación</h2>
-    <p class="lead">Desarrollé un modelo dinámico en Python que acopla la neumática (presión en cada cámara, caudales por orificio ISO 6358, fugas), la mecánica (masas, rozamiento, topes) y un PLC emulado con barrido de 10 ms. Con él probé 12 escenarios, incluidas fallas.</p>
-
-    <figure class="narrow">
-      <img src="img/F01_ciclo_espacio_fase.png" alt="Gráfico del ciclo completo: posición de los ejes X y Z, pinza, etapa del GRAFCET, bobinas y sensores" loading="lazy" width="1283" height="1400">
-      <figcaption><strong>Ciclo completo:</strong> los ejes, la pinza y la etapa activa del GRAFCET avanzan solo con la confirmación de cada sensor. Ciclo de 5,27 s con dispersión de ±0,005 s en 10 repeticiones.</figcaption>
-    </figure>
-
-    <div class="split">
-      <figure>
-        <img src="img/F04_caida_presion_retencion.png" alt="Gráfico de caída de presión: con antirretornos la fuerza de agarre se mantiene; sin ellos la pieza cae" loading="lazy" width="1400" height="1281">
-        <figcaption><strong>Caída de la red de aire con la pieza sujeta:</strong> sin antirretornos pilotados la pieza cae a los 0,56 s; con ellos la fuerza de agarre se mantiene sobre el mínimo de diseño.</figcaption>
-      </figure>
-      <figure>
-        <img src="img/F06_parada_emergencia_valvulas.png" alt="Gráfico de parada de emergencia comparando válvulas 5/2 monoestables y 5/3 de centro cerrado" loading="lazy" width="1400" height="1218">
-        <figcaption><strong>Parada de emergencia:</strong> con válvulas 5/2 el carro retrocedía 97 mm sin control. La simulación justificó cambiar a 5/3 de centro cerrado, que detiene los ejes donde están.</figcaption>
-      </figure>
-    </div>
-
-    <h3 class="sub-h">Lo que la simulación cambió del diseño</h3>
-    <ul class="facts">
-      <li><strong>Válvulas 5/3 de centro cerrado</strong> en los ejes, en lugar de 5/2: los ejes quedan bloqueados ante alarma o emergencia.</li>
-      <li><strong>Vigilancia E‑07 ampliada</strong> a la apertura de la pinza: detecta una pinza trabada en destino.</li>
-      <li><strong>Reguladores de caudal ajustados</strong> a 0,40 m/s (X) y 0,30 m/s (Z): la energía de impacto en el final de carrera del eje X baja un 78 %.</li>
-      <li><strong>Arranque progresivo</strong> confirmado: al volver el aire, la velocidad máxima del carro baja de 1,26 a 0,17 m/s.</li>
+    <ul class="stats">
+      <li><strong><span data-count="5.27">5,27</span><small>s</small></strong><span>ciclo simulado (objetivo ≤ 8 s)</span></li>
+      <li><strong>±0,005<small>s</small></strong><span>dispersión en 10 ciclos</span></li>
+      <li><strong><span data-count="72">72</span><small>/ 72</small></strong><span>pruebas de lógica superadas</span></li>
+      <li><strong><span data-count="12">12</span><small>casos</small></strong><span>escenarios de falla simulados</span></li>
     </ul>
+    <div class="crosshair" aria-hidden="true"><i class="h"></i><i class="v"></i><span class="tag"></span></div>
   </section>
 
-  <section id="pruebalo" class="wrap section">
-    <h2>5 · Pruébalo tú mismo</h2>
-    <p class="lead">La lógica de control completa corre en un Arduino Mega que hace de PLC, con pulsadores, pilotos y una pantalla que muestra la etapa, los ejes y las alarmas. Un banco de pruebas automático verifica la lógica: 72 de 72 comprobaciones correctas.</p>
-    <figure>
-      <img src="img/wokwi.png" alt="Simulación en Wokwi: código del PLC y tablero con Arduino Mega, pulsadores, pilotos y pantalla LCD" loading="lazy" width="1600" height="654">
-      <figcaption>Tablero interactivo en Wokwi: pulsa ▶, luego MARCHA, y prueba la emergencia o el retiro de pieza.</figcaption>
-    </figure>
-    <div class="cta">
-      <a class="btn primary" href="https://wokwi.com/projects/477671830161685505" target="_blank" rel="noopener" data-goatcounter-click="wokwi-pruebalo">Abrir la simulación en Wokwi</a>
+  <section id="problema" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">01 /</span><h2>El problema</h2></div>
+      <div class="section-body">
+        <p class="lead" data-reveal>En una célula de mecanizado, un operador traslada a mano cada pieza de acero (Ø50 × 60 mm, 0,93 kg) desde el torno hasta la inspección, a 400 mm de distancia.</p>
+        <div class="cells c3">
+          <div class="metric" data-reveal><strong>18 ± 4 s</strong><p>por traslado: cerca del 30 % del ciclo de la célula, sin agregar valor.</p></div>
+          <div class="metric" data-reveal><strong>2 %</strong><p>de las piezas se dañan por la manipulación.</p></div>
+          <div class="metric" data-reveal><strong>Ergonomía</strong><p>Movimiento repetitivo con carga, aristas vivas y pieza caliente.</p></div>
+        </div>
+        <p class="note">Datos del caso de estudio planteado en la asignatura Diseño de Sistemas Mecatrónicos.</p>
+      </div>
     </div>
   </section>
 
-  <section class="wrap section">
-    <h2>Herramientas</h2>
-    <ul class="chips">
-      <li>Python (modelo dinámico)</li><li>Jupyter</li><li>Wokwi · Arduino Mega como PLC</li><li>C++</li><li>QElectroTech (IEC 60617)</li><li>AutoCAD</li><li>GRAFCET (IEC 60848)</li><li>ISO 1219‑1</li>
-    </ul>
-  </section>
-
-  <section class="wrap section">
-    <h2>Lo que aprendí</h2>
-    <div class="cards three">
-      <article class="card"><h3>Cada falla pide su propia defensa</h3><p>La pérdida eléctrica y la neumática afectan la sujeción de forma distinta: una se resuelve con la válvula, la otra con antirretornos. Y ninguna se da por resuelta sin medirla.</p></article>
-      <article class="card"><h3>La seguridad, fuera del programa</h3><p>Separar la cadena de seguridad del PLC agrega componentes, pero cada función queda en un elemento que se puede probar por separado.</p></article>
-      <article class="card"><h3>Simular antes de construir</h3><p>La simulación detectó un retroceso peligroso en emergencia que no era evidente en el papel, y cambió la selección de válvulas.</p></article>
+  <section id="solucion" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">02 /</span><h2>La solución</h2></div>
+      <div class="section-body">
+        <p class="lead" data-reveal>Un manipulador cartesiano sobre pórtico de aluminio: un cilindro horizontal (eje X, Ø32 × 400) mueve un carro guiado, del que cuelga un cilindro guiado vertical (eje Z, Ø25 × 150) con una pinza paralela de mordazas en V.</p>
+        <figure data-reveal>
+          <a class="zoom" href="img/plano_autocad.webp" aria-label="Ampliar plano general">
+            <img src="img/plano_autocad.webp" alt="Plano general del manipulador en AutoCAD, vistas en elevación y planta con cotas, trayectorias y zonas de movimiento" loading="lazy" width="1600" height="1347">
+          </a>
+          <figcaption><strong>Plano general en AutoCAD:</strong> elevación y planta, carreras, sensores, trayectoria del ciclo y zona protegida.</figcaption>
+        </figure>
+        <div class="cells c3" style="margin-top:32px">
+          <article data-reveal><h3>Requerimientos trazables</h3><p>26 requerimientos funcionales, de desempeño, seguridad, restricción e interfaz, cada uno vinculado a un componente y a una prueba.</p></article>
+          <article data-reveal><h3>Dimensionamiento</h3><p>Fuerza de agarre de 168 N con factor de seguridad 2, verificada también a 5 bar; consumo de aire de 6,8 NL por ciclo.</p></article>
+          <article data-reveal><h3>Decisión clave</h3><p>Control por PLC en lugar de neumática pura: permite contar piezas, diagnosticar fallas, enclavar movimientos y operar paso a paso.</p></article>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="wrap section">
-    <div class="cta">
-      <a class="btn" href="../../#proyectos">← Volver al perfil</a>
-      <a class="btn primary" href="../../#contacto">Contactar</a>
+  <section id="control" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">03 /</span><h2>Control y seguridad</h2></div>
+      <div class="section-body">
+        <div class="seq" data-seq data-reveal>
+          <div class="seq-head">
+            <p>Secuencia del ciclo · <b data-seq-now>0 Reposo</b></p>
+            <button class="icon-btn" type="button" data-seq-toggle aria-label="Pausar animación">❚❚</button>
+          </div>
+          <div class="seq-stage">
+            <svg class="seq-svg" viewBox="0 0 640 340" role="img" aria-label="Esquema simplificado del manipulador ejecutando la secuencia B+ C+ B− A+ B+ C− B− A−">
+              <!-- piso -->
+              <line class="ln" x1="30" y1="300" x2="610" y2="300"/>
+              <path class="hatch" d="M44 300 l-8 8 M60 300 l-8 8 M76 300 l-8 8 M92 300 l-8 8 M108 300 l-8 8 M124 300 l-8 8 M140 300 l-8 8 M156 300 l-8 8 M172 300 l-8 8 M188 300 l-8 8 M204 300 l-8 8 M220 300 l-8 8 M236 300 l-8 8 M252 300 l-8 8 M268 300 l-8 8 M284 300 l-8 8 M300 300 l-8 8 M316 300 l-8 8 M332 300 l-8 8 M348 300 l-8 8 M364 300 l-8 8 M380 300 l-8 8 M396 300 l-8 8 M412 300 l-8 8 M428 300 l-8 8 M444 300 l-8 8 M460 300 l-8 8 M476 300 l-8 8 M492 300 l-8 8 M508 300 l-8 8 M524 300 l-8 8 M540 300 l-8 8 M556 300 l-8 8 M572 300 l-8 8 M588 300 l-8 8 M604 300 l-8 8"/>
+              <!-- pórtico -->
+              <line class="ln" x1="70" y1="56" x2="70" y2="300"/>
+              <line class="ln" x1="570" y1="56" x2="570" y2="300"/>
+              <rect class="soft" x="60" y="40" width="520" height="16"/>
+              <text x="60" y="30">EJE X · CILINDRO Ø32 × 400</text>
+              <!-- estaciones -->
+              <rect class="soft" x="120" y="262" width="100" height="38"/>
+              <text x="170" y="285" text-anchor="middle">TORNO CNC</text>
+              <rect class="soft" x="420" y="262" width="100" height="38"/>
+              <text x="470" y="285" text-anchor="middle">INSPECCIÓN</text>
+              <!-- cota entre estaciones -->
+              <path class="acc" d="M170 318 L470 318 M170 312 L170 324 M470 312 L470 324"/>
+              <text x="320" y="334" text-anchor="middle" style="fill:var(--accent)">400 mm</text>
+
+              <!-- pieza -->
+              <rect class="piece mv" data-piece x="158" y="232" width="24" height="30"/>
+
+              <!-- carro + eje Z + pinza -->
+              <g class="mv" data-car>
+                <rect class="mv rod solid" data-rod x="167" y="102" width="6" height="108" style="transform:scaleY(.074)"/>
+                <rect class="soft" x="140" y="34" width="60" height="28"/>
+                <rect class="soft" x="161" y="62" width="18" height="40"/>
+                <text x="186" y="82">Z · Ø25×150</text>
+                <g class="mv" data-z>
+                  <rect class="solid" x="144" y="110" width="52" height="12"/>
+                  <rect class="solid mv" data-jaw-l x="152" y="122" width="6" height="34" style="transform:translateX(-8px)"/>
+                  <rect class="solid mv" data-jaw-r x="182" y="122" width="6" height="34" style="transform:translateX(8px)"/>
+                </g>
+              </g>
+            </svg>
+          </div>
+          <ol class="seq-steps">
+            <li><button type="button"><b>0</b>Reposo</button></li>
+            <li><button type="button"><b>B+</b>Z baja</button></li>
+            <li><button type="button"><b>C+</b>Cierra pinza</button></li>
+            <li><button type="button"><b>B−</b>Z sube</button></li>
+            <li><button type="button"><b>A+</b>X avanza</button></li>
+            <li><button type="button"><b>B+</b>Z baja</button></li>
+            <li><button type="button"><b>C−</b>Abre pinza</button></li>
+            <li><button type="button"><b>B−</b>Z sube</button></li>
+            <li><button type="button"><b>A−</b>X retorna</button></li>
+          </ol>
+          <p class="seq-legend"><b>A</b> eje X · <b>B</b> eje Z · <b>C</b> pinza. Esquema simplificado, sin escala. Toca un paso para verlo.</p>
+        </div>
+
+        <div class="split">
+          <div data-reveal>
+            <h3>Control secuencial</h3>
+            <ul class="dash">
+              <li><strong>GRAFCET (IEC 60848)</strong> de 10 etapas que ejecuta la secuencia B+ C+ B− A+ B+ C− B− A−.</li>
+              <li>Ninguna etapa avanza sin que el sensor confirme el movimiento anterior.</li>
+              <li><strong>8 enclavamientos</strong> (E‑01 a E‑08): presión baja, nido ocupado, fallo de agarre, apertura fuera de destino, emergencia, vigilancia de tiempo y caída de presión.</li>
+              <li>Modo manual paso a paso y rearme supervisado.</li>
+            </ul>
+          </div>
+          <div data-reveal>
+            <h3>Seguridad independiente del PLC</h3>
+            <ul class="dash">
+              <li>Seta de emergencia y puerta enclavada en serie sobre un <strong>relé de seguridad de 2 canales</strong>.</li>
+              <li><strong>Parada de categoría 0:</strong> corta las bobinas y descarga el aire sin depender del programa.</li>
+              <li>Antirretornos pilotados para que la pieza no caiga ante pérdida de presión.</li>
+              <li>Bloqueo y consignación para mantenimiento.</li>
+            </ul>
+          </div>
+        </div>
+        <figure data-reveal>
+          <a class="zoom" href="img/esquema_seguridad.webp" aria-label="Ampliar esquema de seguridad">
+            <img src="img/esquema_seguridad.webp" alt="Esquema eléctrico de la cadena de seguridad con relé K0, seta S0 y puerta SP" loading="lazy" width="1600" height="948">
+          </a>
+          <figcaption><strong>Cadena de seguridad en QElectroTech (IEC 60617):</strong> S0 y SP en serie sobre los dos canales del relé K0, con rearme manual.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="validacion" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">04 /</span><h2>Validación en simulación</h2></div>
+      <div class="section-body">
+        <p class="lead" data-reveal>Desarrollé un modelo dinámico en Python que acopla la neumática (presión en cada cámara, caudales por orificio ISO 6358, fugas), la mecánica (masas, rozamiento, topes) y un PLC emulado con barrido de 10 ms. Con él probé 12 escenarios, incluidas fallas.</p>
+
+        <div class="narrative">
+          <figure class="narrative-fig">
+            <a class="zoom" href="img/F01_ciclo_espacio_fase.webp" aria-label="Ampliar gráfico del ciclo completo">
+              <img src="img/F01_ciclo_espacio_fase.webp" alt="Gráfico del ciclo completo: posición de los ejes X y Z, pinza, etapa del GRAFCET, bobinas y sensores" loading="lazy" width="1283" height="1400">
+            </a>
+            <figcaption><strong>Ciclo completo:</strong> los ejes, la pinza y la etapa activa del GRAFCET avanzan solo con la confirmación de cada sensor. Ciclo de 5,27 s con dispersión de ±0,005 s en 10 repeticiones.</figcaption>
+          </figure>
+
+          <div class="narrative-text">
+            <h3 class="sub-h">Lo que la simulación cambió del diseño</h3>
+            <ul class="dash" data-reveal>
+              <li><strong>Válvulas 5/3 de centro cerrado</strong> en los ejes, en lugar de 5/2: los ejes quedan bloqueados ante alarma o emergencia.</li>
+              <li><strong>Vigilancia E‑07 ampliada</strong> a la apertura de la pinza: detecta una pinza trabada en destino.</li>
+              <li><strong>Reguladores de caudal ajustados</strong> a 0,40 m/s (X) y 0,30 m/s (Z): la energía de impacto en el final de carrera del eje X baja un 78 %.</li>
+              <li><strong>Arranque progresivo</strong> confirmado: al volver el aire, la velocidad máxima del carro baja de 1,26 a 0,17 m/s.</li>
+            </ul>
+            <figure data-reveal>
+              <a class="zoom" href="img/F04_caida_presion_retencion.webp" aria-label="Ampliar gráfico de caída de presión">
+                <img src="img/F04_caida_presion_retencion.webp" alt="Gráfico de caída de presión: con antirretornos la fuerza de agarre se mantiene; sin ellos la pieza cae" loading="lazy" width="1400" height="1281">
+              </a>
+              <figcaption><strong>Caída de la red de aire con la pieza sujeta:</strong> sin antirretornos pilotados la pieza cae a los 0,56 s; con ellos la fuerza de agarre se mantiene sobre el mínimo de diseño.</figcaption>
+            </figure>
+            <figure data-reveal>
+              <a class="zoom" href="img/F06_parada_emergencia_valvulas.webp" aria-label="Ampliar gráfico de parada de emergencia">
+                <img src="img/F06_parada_emergencia_valvulas.webp" alt="Gráfico de parada de emergencia comparando válvulas 5/2 monoestables y 5/3 de centro cerrado" loading="lazy" width="1400" height="1218">
+              </a>
+              <figcaption><strong>Parada de emergencia:</strong> con válvulas 5/2 el carro retrocedía 97 mm sin control. La simulación justificó cambiar a 5/3 de centro cerrado, que detiene los ejes donde están.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pruebalo" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">05 /</span><h2>Pruébalo tú mismo</h2></div>
+      <div class="section-body">
+        <p class="lead" data-reveal>La lógica de control completa corre en un Arduino Mega que hace de PLC, con pulsadores, pilotos y una pantalla que muestra la etapa, los ejes y las alarmas. Un banco de pruebas automático verifica la lógica: 72 de 72 comprobaciones correctas.</p>
+        <figure data-reveal>
+          <a class="zoom" href="img/wokwi.webp" aria-label="Ampliar captura de Wokwi">
+            <img src="img/wokwi.webp" alt="Simulación en Wokwi: código del PLC y tablero con Arduino Mega, pulsadores, pilotos y pantalla LCD" loading="lazy" width="1600" height="654">
+          </a>
+          <figcaption>Tablero interactivo en Wokwi: pulsa ▶, luego MARCHA, y prueba la emergencia o el retiro de pieza.</figcaption>
+        </figure>
+        <div class="cta" style="margin-top:24px">
+          <a class="btn primary" href="https://wokwi.com/projects/477671830161685505" target="_blank" rel="noopener" data-goatcounter-click="wokwi-pruebalo">Abrir la simulación en Wokwi <span class="arr">↗</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">06 /</span><h2>Herramientas</h2></div>
+      <div class="section-body">
+        <ul class="chips" data-reveal>
+          <li>Python (modelo dinámico)</li><li>Jupyter</li><li>Wokwi · Arduino Mega como PLC</li><li>C++</li><li>QElectroTech (IEC 60617)</li><li>AutoCAD</li><li>GRAFCET (IEC 60848)</li><li>ISO 1219‑1</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">07 /</span><h2>Lo que aprendí</h2></div>
+      <div class="section-body">
+        <div class="cells c3">
+          <article data-reveal><h3>Cada falla pide su propia defensa</h3><p>La pérdida eléctrica y la neumática afectan la sujeción de forma distinta: una se resuelve con la válvula, la otra con antirretornos. Y ninguna se da por resuelta sin medirla.</p></article>
+          <article data-reveal><h3>La seguridad, fuera del programa</h3><p>Separar la cadena de seguridad del PLC agrega componentes, pero cada función queda en un elemento que se puede probar por separado.</p></article>
+          <article data-reveal><h3>Simular antes de construir</h3><p>La simulación detectó un retroceso peligroso en emergencia que no era evidente en el papel, y cambió la selección de válvulas.</p></article>
+        </div>
+        <div class="cta" style="margin-top:32px">
+          <a class="btn" href="../../#proyectos"><span class="arr">←</span> Volver al perfil</a>
+          <a class="btn primary" href="../../#contacto">Contactar <span class="arr">→</span></a>
+        </div>
+      </div>
     </div>
   </section>
 </main>
 
-<footer class="wrap foot">© <span id="y">2026</span> Cristianfer Silva Portillo</footer>
+<footer class="wrap foot">
+  <p>© <span id="y">2026</span> Cristianfer Silva Portillo</p>
+  <p><a href="../../">Volver al perfil</a></p>
+  <p><a href="#">↑ Volver arriba</a></p>
+</footer>
 
-<script>
-  const r = document.documentElement, b = document.getElementById('theme');
-  try { const t = localStorage.getItem('theme'); if (t) r.dataset.theme = t; } catch (e) {}
-  b.onclick = () => {
-    const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-    r.dataset.theme = dark ? 'light' : 'dark';
-    try { localStorage.setItem('theme', r.dataset.theme); } catch (e) {}
-  };
-  document.getElementById('y').textContent = new Date().getFullYear();
-</script>
 <!-- GoatCounter (estadísticas de visitas, gratis y sin cookies).
      Para activarlo: crear la cuenta en https://www.goatcounter.com, reemplazar TU-CODIGO
      por el código elegido y quitar estas dos líneas de comentario (la de arriba y la de abajo).

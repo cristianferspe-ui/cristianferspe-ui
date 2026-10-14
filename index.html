@@ -12,229 +12,361 @@
 <meta property="og:image" content="https://cristianferspe-ui.github.io/cristianferspe-ui/og.png">
 <meta property="og:locale" content="es_CL">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230f7487'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='white' text-anchor='middle'>CS</text></svg>">
-<link rel="stylesheet" href="styles.css">
+<meta name="theme-color" content="#0f7487">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230f7487'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='white' text-anchor='middle'>CS</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css?v=20261014">
+<script>
+  // Aplica el tema guardado antes de pintar (evita el parpadeo claro/oscuro)
+  try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<script defer src="main.js?v=20261014"></script>
 </head>
 <body>
+<a class="skip" href="#perfil">Saltar al contenido</a>
+<div class="progress" aria-hidden="true"><span data-progress></span></div>
+
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="logo" href="#inicio">CS<span>.</span></a>
-    <nav>
-      <a href="#perfil">Perfil</a>
-      <a href="#experiencia">Experiencia</a>
-      <a href="#proyectos">Proyectos</a>
-      <a href="#educacion">Educación</a>
-      <a href="#certificaciones">Certificaciones</a>
-      <a href="#habilidades">Habilidades</a>
-      <a href="#cv">CV</a>
-      <a href="#contacto">Contacto</a>
+    <a class="logo" href="#inicio" aria-label="Inicio">CS<span>.</span></a>
+    <nav class="nav-links" aria-label="Secciones">
+      <a href="#perfil"><span>01</span>Perfil</a>
+      <a href="#experiencia"><span>02</span>Experiencia</a>
+      <a href="#proyectos"><span>03</span>Proyectos</a>
+      <a href="#educacion"><span>04</span>Educación</a>
+      <a href="#certificaciones"><span>05</span>Certificaciones</a>
+      <a href="#habilidades"><span>06</span>Habilidades</a>
+      <a href="#cv"><span>07</span>CV</a>
+      <a href="#contacto"><span>08</span>Contacto</a>
     </nav>
-    <button class="theme" id="theme" aria-label="Cambiar tema">◐</button>
+    <button class="icon-btn theme" id="theme" type="button" aria-label="Cambiar tema claro u oscuro">◐</button>
+    <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu"><i></i></button>
   </div>
 </header>
 
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <nav aria-label="Menú móvil">
+    <a href="#perfil"><span>01</span>Perfil</a>
+    <a href="#experiencia"><span>02</span>Experiencia</a>
+    <a href="#proyectos"><span>03</span>Proyectos</a>
+    <a href="#educacion"><span>04</span>Educación</a>
+    <a href="#certificaciones"><span>05</span>Certificaciones</a>
+    <a href="#habilidades"><span>06</span>Habilidades</a>
+    <a href="#cv"><span>07</span>Currículum</a>
+    <a href="#contacto"><span>08</span>Contacto</a>
+  </nav>
+  <div class="menu-foot">
+    <a class="btn primary sm" href="CV_Cristianfer_Silva_Portillo.pdf" download data-goatcounter-click="cv-diseno-menu">Descargar CV</a>
+    <a class="btn sm" href="mailto:cristianferspe@gmail.com">Escribirme</a>
+  </div>
+</div>
+
 <main id="inicio">
-  <section class="hero wrap">
-    <p class="eyebrow">Coquimbo, Chile</p>
-    <h1>Cristianfer Silva Portillo</h1>
-    <p class="role">Confiabilidad operacional · Sistemas de control · Energía eólica</p>
-    <p class="intro">Más de 9 años manteniendo en operación turbinas eólicas Siemens G2.101, hoy liderando un equipo de 8 técnicos. Estudiante de último semestre de Ingeniería en Automatización y Control Industrial.</p>
-    <div class="cta">
-      <a class="btn primary" href="CV_Cristianfer_Silva_Portillo.pdf" download data-goatcounter-click="cv-diseno-portada">Descargar CV</a>
-      <a class="btn" href="#contacto">Contactar</a>
+  <section class="hero blueprint" data-hero>
+    <div class="wrap hero-inner">
+      <div class="hero-text">
+        <p class="kicker rise" style="--d:0">Coquimbo, Chile · 29°57′S 71°20′O</p>
+        <h1 class="rise" style="--d:1">Cristianfer<br>Silva Portillo</h1>
+        <p class="role rise" style="--d:2">Confiabilidad operacional · Sistemas de control · Energía eólica</p>
+        <p class="intro rise" style="--d:3">Más de 9 años manteniendo en operación turbinas eólicas Siemens G2.101, hoy liderando un equipo de 8 técnicos. Estudiante de último semestre de Ingeniería en Automatización y Control Industrial.</p>
+        <div class="cta rise" style="--d:4">
+          <a class="btn primary" href="CV_Cristianfer_Silva_Portillo.pdf" download data-goatcounter-click="cv-diseno-portada">Descargar CV <span class="arr">↓</span></a>
+          <a class="btn" href="#contacto">Contactar <span class="arr">→</span></a>
+        </div>
+      </div>
+
+      <div class="hero-art rise" style="--d:3" aria-hidden="true">
+        <svg class="drawing" viewBox="0 0 420 520" role="img">
+          <!-- cota del rotor -->
+          <line class="thin" x1="44" y1="30" x2="206" y2="30" stroke-dasharray="3 4"/>
+          <line class="thin" x1="44" y1="270" x2="206" y2="270" stroke-dasharray="3 4"/>
+          <line class="acc" x1="54" y1="30" x2="54" y2="270"/>
+          <path class="acc" d="M50 38 L54 30 L58 38 M50 262 L54 270 L58 262"/>
+          <text class="k" x="46" y="150" transform="rotate(-90 46 150)" text-anchor="middle">Ø 101 m</text>
+          <!-- círculo de barrido -->
+          <circle class="acc" cx="210" cy="150" r="120" stroke-dasharray="2 5"/>
+          <!-- torre -->
+          <path class="ln draw-in" d="M204 162 L196 440 L224 440 L216 162"/>
+          <line class="thin" x1="210" y1="170" x2="210" y2="432" stroke-dasharray="10 4 2 4"/>
+          <!-- rotor -->
+          <g class="rotor">
+            <path class="blade" d="M210 150 L204.5 138 Q202 84 208 31 L212 31 Q218 84 215.5 138 Z"/>
+            <path class="blade" d="M210 150 L204.5 138 Q202 84 208 31 L212 31 Q218 84 215.5 138 Z" transform="rotate(120 210 150)"/>
+            <path class="blade" d="M210 150 L204.5 138 Q202 84 208 31 L212 31 Q218 84 215.5 138 Z" transform="rotate(240 210 150)"/>
+          </g>
+          <rect class="ln" x="199" y="140" width="22" height="20" fill="none"/>
+          <circle class="hub" cx="210" cy="150" r="6"/>
+          <!-- rótulo del modelo -->
+          <path class="thin" d="M222 144 L300 96 L404 96"/>
+          <circle class="hub" cx="222" cy="144" r="2"/>
+          <text x="306" y="90">G2.101 · 2,3 MW</text>
+          <!-- terreno -->
+          <line class="ln" x1="70" y1="440" x2="350" y2="440"/>
+          <path class="thin" d="M84 440 l-8 9 M100 440 l-8 9 M116 440 l-8 9 M132 440 l-8 9 M148 440 l-8 9 M164 440 l-8 9 M180 440 l-8 9 M240 440 l-8 9 M256 440 l-8 9 M272 440 l-8 9 M288 440 l-8 9 M304 440 l-8 9 M320 440 l-8 9 M336 440 l-8 9 M352 440 l-8 9"/>
+          <!-- cajetín -->
+          <rect class="ln" x="210" y="462" width="200" height="54"/>
+          <line class="thin" x1="210" y1="480" x2="410" y2="480"/>
+          <line class="thin" x1="210" y1="498" x2="410" y2="498"/>
+          <line class="thin" x1="268" y1="462" x2="268" y2="516"/>
+          <text x="216" y="475">MODELO</text><text x="274" y="475" class="k">SIEMENS G2.101</text>
+          <text x="216" y="493">PARQUE</text><text x="274" y="493">50 × 2,3 = 115 MW</text>
+          <text x="216" y="511">ROL</text><text x="274" y="511">TROUBLESHOOTER</text>
+          <text x="10" y="511">VISTA FRONTAL · S/E</text>
+        </svg>
+      </div>
     </div>
+
     <ul class="stats">
-      <li><strong>9+</strong><span>años en energía eólica</span></li>
-      <li><strong>115 MW</strong><span>50 turbinas Siemens G2.101</span></li>
-      <li><strong>8</strong><span>técnicos a cargo</span></li>
+      <li><strong><span data-count="9">9</span><small>+ años</small></strong><span>en energía eólica</span></li>
+      <li><strong><span data-count="115">115</span><small>MW</small></strong><span>potencia del parque</span></li>
+      <li><strong><span data-count="50">50</span><small>turbinas</small></strong><span>Siemens G2.101</span></li>
+      <li><strong><span data-count="8">8</span><small>técnicos</small></strong><span>a mi cargo</span></li>
     </ul>
+    <div class="crosshair" aria-hidden="true"><i class="h"></i><i class="v"></i><span class="tag"></span></div>
   </section>
 
-  <section id="perfil" class="wrap section">
-    <h2>Perfil</h2>
-    <p class="lead">Estudiante de último semestre de Ingeniería en Automatización y Control Industrial y Técnico de Nivel Superior en Energías Renovables (titulado). En un parque de 50 aerogeneradores (115 MW) aplico análisis de causa raíz, gestión de seguridad y análisis de datos con Python para mejorar la confiabilidad y la disponibilidad de los equipos. Complemento el terreno con formación en diseño de sistemas de control: requerimientos, lógica secuencial en PLC, dimensionamiento electroneumático y seguridad de máquinas. Busco roles de <strong>Supervisor de Operaciones</strong>, <strong>Ingeniero de Confiabilidad</strong> o <strong>Ingeniero de Automatización</strong>.</p>
-  </section>
-
-  <section id="experiencia" class="wrap section">
-    <h2>Experiencia</h2>
-    <article class="item">
-      <div class="item-head">
-        <div>
-          <h3>Técnico Troubleshooter — Turbinas Eólicas Siemens G2.101</h3>
-          <p class="org">Siemens Gamesa (Siemens Energy) · Parque eólico de 50 turbinas (115 MW) · Coquimbo</p>
-        </div>
-        <span class="date">Nov 2017 – Presente</span>
-      </div>
+  <div class="marquee" aria-label="Áreas de trabajo">
+    <div class="marquee-track">
       <ul>
-        <li><strong>Liderazgo de un equipo de 8 técnicos de mantenimiento:</strong> planificación y coordinación de intervenciones, capacitación del personal nuevo y punto de escalamiento para las fallas críticas del parque.</li>
-        <li>Nombrado <strong>Appointed Person</strong> (2026) y certificado como <strong>evaluador de competencias técnicas</strong> (Competent Assessor y Merit Assessor).</li>
-        <li><strong>Análisis de causa raíz</strong> de fallas recurrentes en sistemas eléctricos, mecánicos e hidráulicos, convertidores de frecuencia (VFD) y comunicaciones industriales, con acciones correctivas para evitar su repetición.</li>
-        <li><strong>Análisis de datos operacionales</strong> y alarmas del SCADA con Python para identificar patrones de falla y priorizar intervenciones según su impacto en la disponibilidad.</li>
-        <li><strong>Gestión de seguridad:</strong> bloqueo y consignación (LOTO), trabajo en altura e intervenciones con energía eléctrica, hidráulica y mecánica.</li>
-        <li>Elaboración de <strong>reportes técnicos de falla</strong> y documentación para la mejora continua del plan de mantenimiento.</li>
+        <li>PLC · Ladder · FBD</li><li>GRAFCET IEC 60848</li><li>SCADA</li><li>Análisis de causa raíz</li><li>Confiabilidad</li><li>Python</li><li>Convertidores VFD</li><li>Bloqueo y consignación</li><li>Modbus · RS‑485</li><li>Seguridad de máquinas</li><li>AutoCAD</li><li>GWO</li>
       </ul>
-    </article>
-  </section>
+      <ul aria-hidden="true">
+        <li>PLC · Ladder · FBD</li><li>GRAFCET IEC 60848</li><li>SCADA</li><li>Análisis de causa raíz</li><li>Confiabilidad</li><li>Python</li><li>Convertidores VFD</li><li>Bloqueo y consignación</li><li>Modbus · RS‑485</li><li>Seguridad de máquinas</li><li>AutoCAD</li><li>GWO</li>
+      </ul>
+    </div>
+  </div>
 
-  <section id="proyectos" class="wrap section">
-    <h2>Proyectos de ingeniería</h2>
-    <article class="item">
-      <div class="item-head">
-        <div>
-          <h3>Manipulador neumático cartesiano de 2 ejes con control PLC</h3>
-          <p class="org">Proyecto académico · Instituto Profesional AIEP</p>
-        </div>
-        <span class="date">2026</span>
+  <section id="perfil" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">01 /</span><h2>Perfil</h2></div>
+      <div class="section-body">
+        <p class="lead" data-reveal>Estudiante de último semestre de Ingeniería en Automatización y Control Industrial y Técnico de Nivel Superior en Energías Renovables (titulado). En un parque de 50 aerogeneradores (115 MW) aplico análisis de causa raíz, gestión de seguridad y análisis de datos con Python para mejorar la confiabilidad y la disponibilidad de los equipos. Complemento el terreno con formación en diseño de sistemas de control: requerimientos, lógica secuencial en PLC, dimensionamiento electroneumático y seguridad de máquinas. Busco roles de <strong>Supervisor de Operaciones</strong>, <strong>Ingeniero de Confiabilidad</strong> o <strong>Ingeniero de Automatización</strong>.</p>
       </div>
-      <ul>
-        <li>Requerimientos funcionales, de desempeño y de seguridad, medibles y trazables hasta su verificación.</li>
-        <li>Control secuencial en <strong>GRAFCET (IEC 60848)</strong> de 10 etapas con 8 enclavamientos y diagnóstico de fallas.</li>
-        <li><strong>Dimensionamiento</strong> de actuadores y pinza: fuerza de agarre con factor de seguridad 2 y consumo de aire de 6,8 NL/ciclo.</li>
-        <li><strong>Cadena de seguridad independiente del PLC:</strong> relé de seguridad, parada de categoría 0 y resguardo enclavado.</li>
-        <li><strong>Validado en simulación:</strong> modelo dinámico en Python (12 escenarios de falla) y lógica en Wokwi con 72/72 pruebas superadas. Ciclo de 5,27 s, un 71 % menor que el traslado manual del caso de estudio.</li>
-      </ul>
-      <a class="project-link" href="proyectos/manipulador/">Ver el caso de estudio completo →</a>
-    </article>
-    <article class="item">
-      <div class="item-head">
-        <div>
-          <h3>Análisis de datos, simulación eléctrica y prototipado</h3>
-          <p class="org">Proyectos personales</p>
-        </div>
-        <span class="date">2015 – Presente</span>
+    </div>
+  </section>
+
+  <section id="experiencia" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">02 /</span><h2>Experiencia</h2></div>
+      <div class="section-body">
+        <article class="job" data-reveal>
+          <div class="job-head">
+            <div>
+              <h3>Técnico Troubleshooter — Turbinas Eólicas Siemens G2.101</h3>
+              <p class="org">Siemens Gamesa (Siemens Energy) · Parque eólico de 50 turbinas (115 MW) · Coquimbo</p>
+            </div>
+            <span class="date">NOV 2017 — HOY</span>
+          </div>
+          <ul class="dash">
+            <li><strong>Liderazgo de un equipo de 8 técnicos de mantenimiento:</strong> planificación y coordinación de intervenciones, capacitación del personal nuevo y punto de escalamiento para las fallas críticas del parque.</li>
+            <li>Nombrado <strong>Appointed Person</strong> (2026) y certificado como <strong>evaluador de competencias técnicas</strong> (Competent Assessor y Merit Assessor).</li>
+            <li><strong>Análisis de causa raíz</strong> de fallas recurrentes en sistemas eléctricos, mecánicos e hidráulicos, convertidores de frecuencia (VFD) y comunicaciones industriales, con acciones correctivas para evitar su repetición.</li>
+            <li><strong>Análisis de datos operacionales</strong> y alarmas del SCADA con Python para identificar patrones de falla y priorizar intervenciones según su impacto en la disponibilidad.</li>
+            <li><strong>Gestión de seguridad:</strong> bloqueo y consignación (LOTO), trabajo en altura e intervenciones con energía eléctrica, hidráulica y mecánica.</li>
+            <li>Elaboración de <strong>reportes técnicos de falla</strong> y documentación para la mejora continua del plan de mantenimiento.</li>
+          </ul>
+        </article>
       </div>
-      <ul>
-        <li>Simulación con Python de curvas de potencia de aerogeneradores y de energía reactiva; scripts para análisis de fallas.</li>
-        <li>Prototipado electrónico con Arduino (C/C++): control, adquisición de datos y validación de circuitos.</li>
-      </ul>
-    </article>
-  </section>
-
-  <section id="educacion" class="wrap section">
-    <h2>Educación</h2>
-    <div class="cards">
-      <article class="card">
-        <span class="badge">En curso · egreso dic. 2026</span>
-        <h3>Ingeniería en Automatización y Control Industrial</h3>
-        <p>Instituto Profesional AIEP, La Serena · 2022 – 2026</p>
-      </article>
-      <article class="card">
-        <span class="badge ok">Titulado · 2023</span>
-        <h3>Técnico de Nivel Superior en Energías Renovables y Eficiencia Energética</h3>
-        <p>CFT Juan Bohón, La Serena · 2019 – 2023</p>
-      </article>
     </div>
   </section>
 
-  <section id="certificaciones" class="wrap section">
-    <h2>Certificaciones</h2>
-    <div class="certs">
-      <article class="card">
-        <span class="badge ok">Vigentes</span>
-        <h3>GWO · Global Wind Organisation</h3>
-        <ul>
-          <li>Trabajo en altura (BST) <span>hasta 09/2027</span></li>
-          <li>Primeros auxilios (BST) <span>hasta 09/2027</span></li>
-          <li>Manejo manual de cargas (BST) <span>hasta 09/2027</span></li>
-          <li>Prevención de incendios (BST) <span>hasta 09/2027</span></li>
-          <li>Rescate avanzado (ART): buje, spinner y pala <span>hasta 09/2027</span></li>
-          <li>Rescate avanzado (ART): nacelle, torre y sótano <span>hasta 09/2027</span></li>
-        </ul>
-      </article>
-      <article class="card">
-        <span class="badge">Siemens Gamesa</span>
-        <h3>Competencias y nombramientos</h3>
-        <ul>
-          <li>Appointed Person Service <span>2026</span></li>
-          <li>Competent Assessor y Merit Assessor <span>2026</span></li>
-          <li>Commissioning y Troubleshooting, plataforma Siemens geared y controlador WTC3 <span>2025</span></li>
-          <li>Competent Person Service <span>2021</span></li>
-          <li>Formación técnica básica: mecánica, eléctrica e hidráulica <span>2019</span></li>
-        </ul>
-      </article>
-      <article class="card">
-        <span class="badge">Seguridad y equipos</span>
-        <h3>Seguridad operacional</h3>
-        <ul>
-          <li>Bloqueo y consignación (LOTO) <span>2021 · 2025</span></li>
-          <li>Inspección de sistemas anticaídas, líneas de vida y puntos de anclaje <span>hasta 2027</span></li>
-          <li>Seguridad eléctrica general <span>hasta 09/2027</span></li>
-          <li>Operación de ascensor de servicio Avanti <span>hasta 04/2027</span></li>
-          <li>Grúa y polipasto · apriete controlado de pernos <span>2017 · 2019</span></li>
-          <li>SCADA · SAP Field Service Management <span>2020 · 2026</span></li>
-        </ul>
-      </article>
+  <section id="proyectos" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">03 /</span><h2>Proyectos de ingeniería</h2></div>
+      <div class="section-body">
+        <article class="feature" data-reveal>
+          <a class="feature-img" href="proyectos/manipulador/" tabindex="-1" aria-hidden="true">
+            <img src="proyectos/manipulador/img/plano_autocad.webp" alt="" loading="lazy" width="1600" height="1347">
+          </a>
+          <div class="feature-body">
+            <p class="meta">Proyecto académico · Instituto Profesional AIEP · 2026</p>
+            <h3>Manipulador neumático cartesiano de 2 ejes con control PLC</h3>
+            <div class="figures">
+              <div><strong>5,27 s</strong><span>ciclo simulado</span></div>
+              <div><strong>72/72</strong><span>pruebas de lógica</span></div>
+              <div><strong>−71 %</strong><span>tiempo de traslado</span></div>
+            </div>
+            <ul class="dash">
+              <li>Requerimientos funcionales, de desempeño y de seguridad, medibles y trazables hasta su verificación.</li>
+              <li>Control secuencial en <strong>GRAFCET (IEC 60848)</strong> de 10 etapas con 8 enclavamientos y diagnóstico de fallas.</li>
+              <li><strong>Dimensionamiento</strong> de actuadores y pinza: fuerza de agarre con factor de seguridad 2 y consumo de aire de 6,8 NL/ciclo.</li>
+              <li><strong>Cadena de seguridad independiente del PLC:</strong> relé de seguridad, parada de categoría 0 y resguardo enclavado.</li>
+              <li><strong>Validado en simulación:</strong> modelo dinámico en Python (12 escenarios de falla) y lógica en Wokwi con 72/72 pruebas superadas. Ciclo de 5,27 s, un 71 % menor que el traslado manual del caso de estudio.</li>
+            </ul>
+            <div class="cta">
+              <a class="btn primary" href="proyectos/manipulador/">Ver el caso de estudio <span class="arr">→</span></a>
+            </div>
+          </div>
+        </article>
+        <article class="project-2" data-reveal>
+          <div class="job-head" style="border:0;padding:0;margin:0">
+            <div>
+              <p class="meta">Proyectos personales</p>
+              <h3>Análisis de datos, simulación eléctrica y prototipado</h3>
+            </div>
+            <span class="date">2015 — HOY</span>
+          </div>
+          <ul class="dash">
+            <li>Simulación con Python de curvas de potencia de aerogeneradores y de energía reactiva; scripts para análisis de fallas.</li>
+            <li>Prototipado electrónico con Arduino (C/C++): control, adquisición de datos y validación de circuitos.</li>
+          </ul>
+        </article>
+      </div>
     </div>
   </section>
 
-  <section id="habilidades" class="wrap section">
-    <h2>Habilidades</h2>
-    <div class="skills">
-      <div><h3>Sistemas de control</h3><p>PLC (Ladder, FBD) · GRAFCET (IEC 60848) · Lógica secuencial · SCADA · Instrumentación</p></div>
-      <div><h3>Electroneumática y diseño</h3><p>Dimensionamiento de actuadores · ISO 1219‑1 · IEC 60617 · AutoCAD · FluidSIM · CADe_SIMU · PC_SIMU</p></div>
-      <div><h3>Confiabilidad y mantenimiento</h3><p>Análisis de causa raíz · Análisis de fallas · Disponibilidad y downtime · Reportes técnicos</p></div>
-      <div><h3>Seguridad de máquinas</h3><p>Cadenas y relés de seguridad · Parada de categoría 0 · Bloqueo y consignación (LOTO)</p></div>
-      <div><h3>Energía y sistemas eléctricos</h3><p>Aerogeneradores · Convertidores de frecuencia (VFD) · Curvas de potencia · Energía reactiva</p></div>
-      <div><h3>Programación y comunicaciones</h3><p>Python · JavaScript · C++ (Arduino) · Modbus · RS‑485</p></div>
-    </div>
-    <p class="langs"><strong>Idiomas:</strong> Español (nativo) · Inglés (técnico / lectura)</p>
-  </section>
-
-  <section id="cv" class="wrap section">
-    <h2>Currículum</h2>
-    <p class="lead">Dos formatos con el mismo contenido. Elige el que mejor te sirva.</p>
-    <div class="cards downloads">
-      <article class="card">
-        <span class="badge">Para leer</span>
-        <h3>CV con diseño</h3>
-        <p>Versión completa y visual, ideal para revisar mi perfil o imprimirlo.</p>
-        <div class="cta">
-          <a class="btn primary" href="CV_Cristianfer_Silva_Portillo.pdf" download data-goatcounter-click="cv-diseno">Descargar PDF</a>
+  <section id="educacion" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">04 /</span><h2>Educación</h2></div>
+      <div class="section-body">
+        <div class="cells c2">
+          <article data-reveal>
+            <div class="cell-top"><span class="status">En curso · egreso dic. 2026</span></div>
+            <h3>Ingeniería en Automatización y Control Industrial</h3>
+            <p>Instituto Profesional AIEP, La Serena · 2022 – 2026</p>
+          </article>
+          <article data-reveal>
+            <div class="cell-top"><span class="status ok">Titulado · 2023</span></div>
+            <h3>Técnico de Nivel Superior en Energías Renovables y Eficiencia Energética</h3>
+            <p>CFT Juan Bohón, La Serena · 2019 – 2023</p>
+          </article>
         </div>
-      </article>
-      <article class="card">
-        <span class="badge">Para plataformas</span>
-        <h3>CV formato ATS</h3>
-        <p>Texto simple en una columna, optimizado para sistemas de selección y portales de empleo.</p>
-        <div class="cta">
-          <a class="btn primary" href="CV_Cristianfer_Silva_Portillo_ATS.pdf" download data-goatcounter-click="cv-ats-pdf">Descargar PDF</a>
-          <a class="btn" href="CV_Cristianfer_Silva_Portillo_ATS.docx" download data-goatcounter-click="cv-ats-word">Descargar Word</a>
-        </div>
-      </article>
+      </div>
     </div>
   </section>
 
-  <section id="contacto" class="wrap section contact">
-    <h2>Contacto</h2>
-    <p class="lead">¿Tienes una oportunidad en operaciones, mantenimiento o automatización? Escríbeme.</p>
-    <div class="cta">
-      <a class="btn primary" href="mailto:cristianferspe@gmail.com">cristianferspe@gmail.com</a>
-      <a class="btn wa" href="#contacto" id="wa" target="_blank" rel="noopener">WhatsApp</a>
-      <a class="btn" href="#contacto" id="tel">Teléfono</a>
-      <a class="btn" href="https://www.linkedin.com/in/cristianfer-silva-portillo-454216184" target="_blank" rel="noopener" id="linkedin">LinkedIn</a>
+  <section id="certificaciones" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">05 /</span><h2>Certificaciones</h2></div>
+      <div class="section-body">
+        <div class="cells c3 certs">
+          <article data-reveal>
+            <span class="status ok">Vigentes</span>
+            <h3>GWO · Global Wind Organisation</h3>
+            <ul class="list-dated">
+              <li>Trabajo en altura (BST) <span>hasta 09/2027</span></li>
+              <li>Primeros auxilios (BST) <span>hasta 09/2027</span></li>
+              <li>Manejo manual de cargas (BST) <span>hasta 09/2027</span></li>
+              <li>Prevención de incendios (BST) <span>hasta 09/2027</span></li>
+              <li>Rescate avanzado (ART): buje, spinner y pala <span>hasta 09/2027</span></li>
+              <li>Rescate avanzado (ART): nacelle, torre y sótano <span>hasta 09/2027</span></li>
+            </ul>
+          </article>
+          <article data-reveal>
+            <span class="status">Siemens Gamesa</span>
+            <h3>Competencias y nombramientos</h3>
+            <ul class="list-dated">
+              <li>Appointed Person Service <span>2026</span></li>
+              <li>Competent Assessor y Merit Assessor <span>2026</span></li>
+              <li>Commissioning y Troubleshooting, plataforma Siemens geared y controlador WTC3 <span>2025</span></li>
+              <li>Competent Person Service <span>2021</span></li>
+              <li>Formación técnica básica: mecánica, eléctrica e hidráulica <span>2019</span></li>
+            </ul>
+          </article>
+          <article data-reveal>
+            <span class="status">Seguridad y equipos</span>
+            <h3>Seguridad operacional</h3>
+            <ul class="list-dated">
+              <li>Bloqueo y consignación (LOTO) <span>2021 · 2025</span></li>
+              <li>Inspección de sistemas anticaídas, líneas de vida y puntos de anclaje <span>hasta 2027</span></li>
+              <li>Seguridad eléctrica general <span>hasta 09/2027</span></li>
+              <li>Operación de ascensor de servicio Avanti <span>hasta 04/2027</span></li>
+              <li>Grúa y polipasto · apriete controlado de pernos <span>2017 · 2019</span></li>
+              <li>SCADA · SAP Field Service Management <span>2020 · 2026</span></li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="habilidades" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">06 /</span><h2>Habilidades</h2></div>
+      <div class="section-body">
+        <div class="bento">
+          <div data-reveal>
+            <span class="idx">A.01</span><h3>Sistemas de control</h3>
+            <ul class="tags"><li>PLC (Ladder, FBD)</li><li>GRAFCET (IEC 60848)</li><li>Lógica secuencial</li><li>SCADA</li><li>Instrumentación</li></ul>
+          </div>
+          <div data-reveal>
+            <span class="idx">A.02</span><h3>Confiabilidad y mantenimiento</h3>
+            <ul class="tags"><li>Análisis de causa raíz</li><li>Análisis de fallas</li><li>Disponibilidad y downtime</li><li>Reportes técnicos</li></ul>
+          </div>
+          <div data-reveal>
+            <span class="idx">A.03</span><h3>Seguridad de máquinas</h3>
+            <ul class="tags"><li>Cadenas y relés de seguridad</li><li>Parada de categoría 0</li><li>Bloqueo y consignación (LOTO)</li></ul>
+          </div>
+          <div data-reveal>
+            <span class="idx">A.04</span><h3>Electroneumática y diseño</h3>
+            <ul class="tags"><li>Dimensionamiento de actuadores</li><li>ISO 1219‑1</li><li>IEC 60617</li><li>AutoCAD</li><li>FluidSIM</li><li>CADe_SIMU</li><li>PC_SIMU</li></ul>
+          </div>
+          <div data-reveal>
+            <span class="idx">A.05</span><h3>Energía y sistemas eléctricos</h3>
+            <ul class="tags"><li>Aerogeneradores</li><li>Convertidores de frecuencia (VFD)</li><li>Curvas de potencia</li><li>Energía reactiva</li></ul>
+          </div>
+          <div data-reveal>
+            <span class="idx">A.06</span><h3>Programación y comunicaciones</h3>
+            <ul class="tags"><li>Python</li><li>JavaScript</li><li>C++ (Arduino)</li><li>Modbus</li><li>RS‑485</li></ul>
+          </div>
+        </div>
+        <p class="langs"><strong>Idiomas:</strong> Español (nativo) · Inglés (técnico / lectura)</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="cv" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">07 /</span><h2>Currículum</h2></div>
+      <div class="section-body">
+        <p class="lead">Dos formatos con el mismo contenido. Elige el que mejor te sirva.</p>
+        <div class="cells c2 downloads">
+          <article data-reveal>
+            <span class="status">Para leer</span>
+            <h3>CV con diseño</h3>
+            <p>Versión completa y visual, ideal para revisar mi perfil o imprimirlo.</p>
+            <div class="cta">
+              <a class="btn primary" href="CV_Cristianfer_Silva_Portillo.pdf" download data-goatcounter-click="cv-diseno">Descargar PDF <span class="arr">↓</span></a>
+            </div>
+          </article>
+          <article data-reveal>
+            <span class="status">Para plataformas</span>
+            <h3>CV formato ATS</h3>
+            <p>Texto simple en una columna, optimizado para sistemas de selección y portales de empleo.</p>
+            <div class="cta">
+              <a class="btn primary" href="CV_Cristianfer_Silva_Portillo_ATS.pdf" download data-goatcounter-click="cv-ats-pdf">Descargar PDF <span class="arr">↓</span></a>
+              <a class="btn" href="CV_Cristianfer_Silva_Portillo_ATS.docx" download data-goatcounter-click="cv-ats-word">Descargar Word <span class="arr">↓</span></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contacto" class="section">
+    <div class="wrap section-grid">
+      <div class="section-label"><span class="num">08 /</span><h2>Contacto</h2></div>
+      <div class="section-body">
+        <p class="contact-q" data-reveal>¿Tienes una oportunidad en operaciones, mantenimiento o automatización? Escríbeme.</p>
+        <a class="mail" href="mailto:cristianferspe@gmail.com" data-reveal>cristianferspe@gmail.com</a>
+        <div class="cta" data-reveal>
+          <a class="btn wa" href="#contacto" id="wa" target="_blank" rel="noopener">WhatsApp <span class="arr">→</span></a>
+          <a class="btn" href="#contacto" id="tel">Teléfono</a>
+          <a class="btn" href="https://www.linkedin.com/in/cristianfer-silva-portillo-454216184" target="_blank" rel="noopener" id="linkedin">LinkedIn <span class="arr">↗</span></a>
+        </div>
+      </div>
     </div>
   </section>
 </main>
 
-<footer class="wrap foot">© <span id="y">2026</span> Cristianfer Silva Portillo</footer>
+<footer class="wrap foot">
+  <p>© <span id="y">2026</span> Cristianfer Silva Portillo</p>
+  <p>Coquimbo, Chile · 29°57′S 71°20′O</p>
+  <p><a href="#inicio">↑ Volver arriba</a></p>
+</footer>
 
-<script>
-  const r = document.documentElement, b = document.getElementById('theme');
-  try { const t = localStorage.getItem('theme'); if (t) r.dataset.theme = t; } catch (e) {}
-  b.onclick = () => {
-    const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-    r.dataset.theme = dark ? 'light' : 'dark';
-    try { localStorage.setItem('theme', r.dataset.theme); } catch (e) {}
-  };
-  document.getElementById('y').textContent = new Date().getFullYear();
-  // El número se arma aquí para que no quede en texto plano en el HTML (menos spam de bots)
-  const n = ['56', '9', '3414', '4545'];
-  const msg = encodeURIComponent('Hola Cristianfer, vi tu sitio web y me gustaría conversar sobre una oportunidad.');
-  document.getElementById('wa').href = 'https://wa.me/' + n.join('') + '?text=' + msg;
-  const tel = document.getElementById('tel');
-  tel.href = 'tel:+' + n.join('');
-  tel.textContent = '+' + n.join(' ');
-</script>
 <!-- GoatCounter (estadísticas de visitas, gratis y sin cookies).
      Para activarlo: crear la cuenta en https://www.goatcounter.com, reemplazar TU-CODIGO
      por el código elegido y quitar estas dos líneas de comentario (la de arriba y la de abajo).
