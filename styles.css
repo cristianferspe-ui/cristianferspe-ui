@@ -182,6 +182,29 @@ img { max-width: 100%; }
   font: 500 12.5px/1.5 var(--mono); color: var(--accent);
   letter-spacing: 1.2px; text-transform: uppercase; margin: 0 0 18px;
 }
+/* Retrato: anillo punteado como el círculo de barrido del dibujo */
+.id { display: flex; align-items: center; gap: 18px; margin: 0 0 22px; }
+.id .kicker { margin: 0; }
+.avatar {
+  flex: none; width: 72px; height: 72px; border-radius: 50%;
+  object-fit: cover; background: #fff;
+  outline: 1px dashed var(--accent); outline-offset: 5px;
+}
+@media (min-width: 960px) { .avatar { width: 88px; height: 88px; } }
+.avail {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 8px;
+  font: 500 12.5px/1.4 var(--mono); color: var(--ok); letter-spacing: .6px;
+  text-transform: uppercase; text-decoration: none;
+}
+.avail:hover { text-decoration: underline; text-underline-offset: 3px; }
+.avail::before {
+  content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%;
+  background: currentColor; animation: pulse 2.4s ease-out infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 50%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 8px transparent; }
+}
 h1 {
   font: 600 clamp(42px, 6.6vw, 84px)/.98 var(--sans);
   letter-spacing: -.035em; margin: 0 0 20px; overflow-wrap: break-word;
@@ -202,7 +225,13 @@ h1 {
 .drawing .hub { fill: var(--ink); }
 .drawing text { font-family: var(--mono); fill: var(--muted); font-size: 11px; letter-spacing: .4px; }
 .drawing text.k { fill: var(--accent); }
+.drawing .gen { fill: var(--surface); }
+/* Plano doble (IWP-83 + G2.101): más ancho, con texto algo mayor para que se lea al reducirse */
+.drawing.duo { max-width: 480px; }
+.drawing.duo text { font-size: 13px; }
+/* Cada rotor define su propio centro de giro con transform-origin en línea */
 .rotor { transform-box: view-box; transform-origin: 210px 150px; animation: spin 10s linear infinite; }
+.rotor.fast { animation-duration: 8s; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .draw-in { stroke-dasharray: 1400; stroke-dashoffset: 0; animation: draw 2.4s var(--ease) both .2s; }
 @keyframes draw { from { stroke-dashoffset: 1400; } }
@@ -483,11 +512,13 @@ figcaption strong { color: var(--ink); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
   .wind { display: none; }
   .rotor { animation: none; }
+  .avail::before { animation: none; }
 }
 
 /* Ajustes del dibujo del hero en pantallas angostas */
 @media (max-width: 959px) {
   .hero-art .drawing { max-width: 320px; }
+  .hero-art .drawing.duo { max-width: 460px; }
   .case-hero .hero-art { max-width: 520px; }
 }
 @media (max-width: 600px) { .seq-svg text { font-size: 13px; } }
