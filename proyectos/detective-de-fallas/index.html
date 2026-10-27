@@ -1,0 +1,1434 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Detective de Fallas · Análisis de causa raíz con Python</title>
+<meta name="description" content="Juego de análisis de causa raíz en un parque eólico: investiga fallas con Python y pandas en el navegador, arma el diagrama de Ishikawa y entrega tu dictamen.">
+<link rel="canonical" href="https://cristianferspe-ui.github.io/cristianferspe-ui/proyectos/detective-de-fallas/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Detective de Fallas · Análisis de causa raíz con Python">
+<meta property="og:description" content="Tres casos reales de parque eólico: Pareto, correlaciones y normalización por carga con pandas, Ishikawa y 5 porqués.">
+<meta property="og:url" content="https://cristianferspe-ui.github.io/cristianferspe-ui/proyectos/detective-de-fallas/">
+<meta property="og:image" content="https://cristianferspe-ui.github.io/cristianferspe-ui/proyectos/detective-de-fallas/og.png">
+<meta property="og:locale" content="es_CL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0f7487">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230f7487'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='white' text-anchor='middle'>CS</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<script>
+  // Aplica el tema guardado del portafolio antes de pintar
+  try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<style>
+/* ---------- Tokens (mismos del portafolio) ---------- */
+:root {
+  --bg: #f3f5f4; --surface: #ffffff; --surface-2: #eef2f1;
+  --ink: #0c1a1f; --muted: #56676f; --line: #cdd6d9;
+  --grid: rgba(15, 116, 135, .07);
+  --accent: #0f7487; --accent-ink: #ffffff;
+  --ok: #1d7a4a; --warn: #a86a0c; --bad: #c0392b; --violet: #6b4fbb;
+  --sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1114; --surface: #0f191d; --surface-2: #14232a; --ink: #e4eef1; --muted: #8fa2aa;
+    --line: #22353c; --grid: rgba(60, 182, 203, .06);
+    --accent: #3cb6cb; --accent-ink: #04161a; --ok: #5fcf93; --warn: #e8a93a; --bad: #ff6f61; --violet: #a993f0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1114; --surface: #0f191d; --surface-2: #14232a; --ink: #e4eef1; --muted: #8fa2aa;
+  --line: #22353c; --grid: rgba(60, 182, 203, .06);
+  --accent: #3cb6cb; --accent-ink: #04161a; --ok: #5fcf93; --warn: #e8a93a; --bad: #ff6f61; --violet: #a993f0;
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; color: var(--ink); font: 400 15px/1.55 var(--sans); -webkit-font-smoothing: antialiased;
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  overflow-x: clip;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 0 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); }
+.eyebrow { font: 500 11px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+code, .mono { font-family: var(--mono); }
+.sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.sec-h h2, .sec-h h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.sec-h .mono { font-size: 12px; color: var(--muted); }
+
+/* ---------- Barra superior ---------- */
+.top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.top-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding-block: 10px; }
+.brand { display: flex; align-items: baseline; gap: 12px; margin-right: auto; min-width: 0; }
+.brand a { font: 500 12px var(--mono); color: var(--muted); text-decoration: none; white-space: nowrap; }
+.brand a:hover { color: var(--accent); }
+.brand h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+.brand h1 span { color: var(--accent); }
+.py-st { display: inline-flex; align-items: center; gap: 8px; font: 500 12px var(--mono); color: var(--muted); white-space: nowrap; }
+.py-st i { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); animation: blink 1s infinite; }
+.py-st.ok i { background: var(--ok); animation: none; }
+.py-st.err i { background: var(--bad); animation: none; }
+@keyframes blink { 50% { opacity: .3; } }
+.icon-btn { border: 1px solid var(--line); background: var(--surface); height: 32px; min-width: 32px; padding: 0 10px; font: 500 12px var(--mono); }
+.icon-btn:hover { border-color: var(--accent); }
+@media (max-width: 560px) {
+  .brand { width: 100%; }
+  .py-st { margin-right: auto; }
+  .py-st .v { display: none; }
+}
+
+/* ---------- Inicio ---------- */
+.hero { padding: 40px 0 24px; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 32px; align-items: end; }
+@media (max-width: 860px) { .hero { grid-template-columns: minmax(0, 1fr); gap: 16px; padding-top: 28px; } }
+.hero h2 { font-size: clamp(30px, 5vw, 48px); line-height: 1.05; letter-spacing: -.02em; margin: 10px 0 14px; }
+.hero h2 span { color: var(--accent); }
+.hero p { margin: 0; color: var(--muted); font-size: 16px; max-width: 60ch; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border: 1px solid var(--line); background: var(--surface); }
+.steps li { display: grid; grid-template-columns: 34px 1fr; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.steps li:last-child { border-bottom: 0; }
+.steps > li > b { font: 600 12px var(--mono); color: var(--accent); }
+.casos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 8px 0 24px; }
+@media (max-width: 860px) { .casos { grid-template-columns: minmax(0, 1fr); } }
+.caso-card { display: flex; flex-direction: column; text-align: left; padding: 18px; gap: 10px; border: 1px solid var(--line); background: var(--surface); border-top: 3px solid var(--accent); transition: border-color .15s, transform .15s; }
+.caso-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.caso-card h3 { margin: 0; font-size: 20px; letter-spacing: -.01em; }
+.caso-card p { margin: 0; color: var(--muted); font-size: 14px; }
+.caso-card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+.tag { font: 500 11px var(--mono); padding: 2px 7px; border: 1px solid var(--line); color: var(--muted); }
+.caso-card .best { font: 600 12px var(--mono); color: var(--ok); }
+.caso-card .go { font: 600 13px var(--mono); color: var(--accent); }
+
+/* ---------- Caso ---------- */
+.caso-top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 18px 0 14px; }
+.caso-top h2 { margin: 2px 0 0; font-size: clamp(20px, 3vw, 28px); letter-spacing: -.01em; }
+.caso-top .grow { flex: 1; min-width: 200px; }
+.back { border: 1px solid var(--line); background: var(--surface); padding: 7px 12px; font: 500 12px var(--mono); }
+.back:hover { border-color: var(--accent); }
+.cons { font: 500 12px var(--mono); color: var(--muted); text-align: right; }
+.cons b { display: block; font-size: 22px; color: var(--ink); }
+.cons b.over { color: var(--warn); }
+.caso-grid { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 16px; align-items: start; padding-bottom: 32px; }
+@media (max-width: 1080px) { .caso-grid { grid-template-columns: minmax(0, 1fr); } }
+.col-main { display: grid; gap: 16px; min-width: 0; }
+.col-side { display: grid; gap: 16px; position: sticky; top: 70px; max-height: calc(100vh - 86px); overflow: auto; min-width: 0; }
+@media (max-width: 1080px) { .col-side { position: static; max-height: none; } }
+.brief { padding: 16px 18px; border-left: 4px solid var(--warn); }
+.brief p { margin: 6px 0 0; }
+.evid { padding: 0; }
+.evid summary { cursor: pointer; padding: 12px 14px; font-weight: 600; font-size: 14px; list-style: none; display: flex; justify-content: space-between; }
+.evid summary::after { content: "+"; font-family: var(--mono); color: var(--muted); }
+.evid[open] summary::after { content: "−"; }
+.evid ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.evid li { padding: 10px 14px; border-bottom: 1px dashed var(--line); font-size: 13.5px; }
+.evid li:last-child { border-bottom: 0; }
+.evid code { font-weight: 600; color: var(--accent); }
+.evid .cols { display: block; font: 400 12px var(--mono); color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+.guias { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; padding: 12px 14px; }
+.guia { text-align: left; border: 1px solid var(--line); background: var(--surface-2); padding: 9px 10px; font-size: 13px; display: flex; gap: 8px; align-items: flex-start; }
+.guia:hover:not(:disabled) { border-color: var(--accent); }
+.guia span { font: 600 11px var(--mono); color: var(--accent); flex: none; padding-top: 1px; }
+.guia.used { opacity: .7; }
+.guia.used span::after { content: " ✓"; color: var(--ok); }
+.editor textarea {
+  display: block; width: 100%; min-height: 150px; resize: vertical; border: 0; border-bottom: 1px solid var(--line);
+  background: var(--surface-2); color: var(--ink); padding: 12px 14px; font: 400 13px/1.55 var(--mono); tab-size: 4; outline: none;
+}
+.editor textarea:focus { box-shadow: inset 0 0 0 2px var(--accent); }
+@media (max-width: 560px) { .editor textarea { font-size: 16px; } } /* evita el zoom automático de iOS */
+.ed-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; }
+.ed-bar small { font: 400 11px var(--mono); color: var(--muted); }
+.btn { border: 1px solid var(--accent); background: none; color: var(--accent); padding: 8px 14px; font: 600 13px var(--mono); }
+.btn:hover:not(:disabled) { background: var(--accent); color: var(--accent-ink); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
+.btn.ghost { border-color: var(--line); color: var(--muted); }
+.btn:disabled { border-color: var(--line); color: var(--muted); background: none; }
+.out { display: grid; gap: 12px; }
+.res { min-width: 0; }
+.res-h { display: flex; justify-content: space-between; gap: 10px; padding: 8px 14px; border-bottom: 1px solid var(--line); font: 500 12px var(--mono); color: var(--muted); }
+.res-h b { color: var(--ink); font-weight: 600; }
+.res details { border-bottom: 1px solid var(--line); }
+.res details summary { cursor: pointer; padding: 6px 14px; font: 500 11px var(--mono); color: var(--muted); }
+.res details pre { margin: 0; padding: 8px 14px 12px; font: 400 12px/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink); }
+.res .stdout { margin: 0; padding: 10px 14px; font: 400 12px/1.5 var(--mono); white-space: pre-wrap; overflow-x: auto; border-bottom: 1px dashed var(--line); }
+.res .stdout:empty { display: none; }
+.res .err { padding: 10px 14px; font: 500 12.5px/1.5 var(--mono); color: var(--bad); white-space: pre-wrap; }
+.res .txt { padding: 10px 14px; font: 400 12.5px var(--mono); white-space: pre-wrap; }
+.tbl { overflow: auto; max-height: 420px; }
+.tbl table.df { border-collapse: collapse; font: 400 12px/1.35 var(--mono); min-width: 100%; }
+.tbl table.df th, .tbl table.df td { padding: 5px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.tbl table.df thead th { position: sticky; top: 0; background: var(--surface-2); font-weight: 600; color: var(--muted); }
+.tbl table.df tbody th { text-align: left; font-weight: 600; }
+.tbl .meta { padding: 6px 14px; font: 400 11px var(--mono); color: var(--muted); }
+.chart { padding: 8px 14px 12px; border-bottom: 1px dashed var(--line); }
+.chart h4 { margin: 0 0 6px; font: 600 12px var(--mono); }
+.chart canvas { display: block; width: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font: 400 11px var(--mono); color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 3px; vertical-align: middle; margin-right: 4px; }
+.empty { padding: 20px 14px; color: var(--muted); font-size: 14px; }
+
+/* ---------- Ishikawa y dictamen ---------- */
+.ishi-cat { padding: 10px 14px 4px; }
+.ishi-cat + .ishi-cat { border-top: 1px dashed var(--line); }
+.ishi-cat h4 { margin: 0 0 6px; font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.hip { padding: 6px 0 10px; }
+.hip p { margin: 0 0 6px; font-size: 13.5px; line-height: 1.4; }
+.tri { display: inline-flex; border: 1px solid var(--line); }
+.tri button { border: 0; border-right: 1px solid var(--line); background: var(--surface); padding: 3px 9px; font: 500 11px var(--mono); color: var(--muted); }
+.tri button:last-child { border-right: 0; }
+.tri button.on[data-v="si"] { background: var(--ok); color: #fff; }
+.tri button.on[data-v="no"] { background: var(--bad); color: #fff; }
+.tri button.on[data-v=""] { background: var(--surface-2); color: var(--ink); }
+.fish { display: block; width: 100%; height: auto; padding: 8px 14px 0; }
+.fish text { font: 600 9px var(--mono); fill: var(--muted); }
+.fish .spine { stroke: var(--ink); stroke-width: 2; }
+.fish .bone { stroke: var(--muted); stroke-width: 1.2; }
+.fish .head { fill: var(--accent); }
+.fish .dot-si { fill: var(--ok); } .fish .dot-no { fill: var(--bad); } .fish .dot- { fill: var(--line); }
+.dict { padding-bottom: 14px; }
+.dict fieldset { border: 0; margin: 0; padding: 12px 14px 0; }
+.dict legend { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); padding: 0; margin-bottom: 6px; }
+.opt { display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: start; padding: 7px 8px; border: 1px solid var(--line); margin-bottom: 6px; font-size: 13.5px; line-height: 1.4; cursor: pointer; }
+.opt:hover { border-color: var(--accent); }
+.opt input { margin: 2px 0 0; accent-color: var(--accent); }
+.opt:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.dict .btn { margin: 8px 14px 0; width: calc(100% - 28px); padding: 11px; }
+.dict small { display: block; margin: 8px 14px 0; font: 400 11px var(--mono); color: var(--muted); }
+
+/* ---------- Glosario ---------- */
+.gloss { margin: 8px 0 24px; scroll-margin-top: 70px; }
+.gloss-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 860px) { .gloss-grid { grid-template-columns: minmax(0, 1fr); } }
+.gloss-grid > div { padding: 14px; border-top: 1px solid var(--line); min-width: 0; }
+.gloss-grid > div:nth-child(odd) { border-right: 1px solid var(--line); }
+@media (max-width: 860px) { .gloss-grid > div:nth-child(odd) { border-right: 0; } .gloss-grid > div:first-child { border-top: 0; } }
+@media (min-width: 861px) { .gloss-grid > div:nth-child(-n+2) { border-top: 0; } }
+.gloss h3 { margin: 0 0 8px; font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.gloss dl { margin: 0; }
+.gloss dt { font-weight: 600; font-size: 14px; margin-top: 10px; }
+.gloss dt:first-child { margin-top: 0; }
+.gloss dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.gloss dd b { color: var(--ink); font-weight: 600; }
+.gloss code { font: 500 12px var(--mono); color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); padding: 1px 5px; white-space: normal; }
+.foot { font: 400 11px var(--mono); color: var(--muted); padding-bottom: 24px; }
+
+/* ---------- Avisos y resultado ---------- */
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 50; background: var(--ink); color: var(--bg); padding: 10px 16px; font: 500 13px var(--mono); max-width: calc(100vw - 32px); }
+dialog { border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 0; width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
+dialog::backdrop { background: rgba(5, 14, 17, .6); }
+.dlg { padding: 22px; }
+.dlg h2 { margin: 6px 0 4px; font-size: 26px; letter-spacing: -.01em; }
+.score { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin: 6px 0 14px; }
+.score b { font: 700 44px var(--mono); }
+.score span { font: 600 18px var(--mono); color: var(--warn); letter-spacing: .1em; }
+.parts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); margin-bottom: 16px; }
+@media (max-width: 560px) { .parts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.parts div { padding: 10px 12px; border-right: 1px solid var(--line); }
+.parts div:last-child { border-right: 0; }
+.parts b { display: block; font: 600 18px var(--mono); }
+.parts small { font: 400 11px var(--mono); color: var(--muted); }
+.dlg h3 { font-size: 15px; margin: 18px 0 8px; }
+.verdict { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.verdict li { border: 1px solid var(--line); padding: 8px 10px; font-size: 13.5px; line-height: 1.45; border-left: 3px solid var(--c, var(--line)); }
+.verdict li.good { --c: var(--ok); } .verdict li.bad { --c: var(--bad); } .verdict li.skip { --c: var(--muted); }
+.verdict .why { display: block; color: var(--muted); font-size: 13px; margin-top: 3px; }
+.verdict .tagv { font: 600 11px var(--mono); color: var(--c); }
+.whys { margin: 0; padding-left: 0; list-style: none; counter-reset: w; display: grid; gap: 6px; }
+.whys li { counter-increment: w; display: grid; grid-template-columns: 28px 1fr; gap: 8px; font-size: 13.5px; line-height: 1.45; }
+.whys li::before { content: counter(w); font: 700 12px var(--mono); color: var(--accent-ink); background: var(--accent); width: 22px; height: 22px; display: grid; place-items: center; }
+.whys li:last-child::before { background: var(--bad); color: #fff; }
+.trap { border: 1px solid var(--warn); border-left-width: 4px; padding: 10px 12px; font-size: 13.5px; margin-top: 8px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand">
+      <a href="../../#proyectos">← Portafolio</a>
+      <h1>Detective de Fallas<span>.</span></h1>
+    </div>
+    <span class="py-st" id="pySt"><i></i><span>Cargando Python…</span><span class="v"></span></span>
+    <button class="icon-btn" type="button" data-act="gloss">Glosario</button>
+    <button class="icon-btn" type="button" data-act="theme" aria-label="Cambiar tema claro u oscuro">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- Inicio -->
+  <section id="vHome">
+    <div class="hero">
+      <div>
+        <span class="eyebrow">Análisis de causa raíz · Python en el navegador</span>
+        <h2>El síntoma no es la <span>causa</span>.</h2>
+        <p>Tres fallas reales de un parque eólico de 12 turbinas. Tienes los datos y una consola Python con pandas. Investiga, descarta hipótesis y entrega tu dictamen antes de que alguien cambie la pieza equivocada.</p>
+      </div>
+      <ol class="steps">
+        <li><b>01</b><span>Lee el caso y revisa la evidencia disponible.</span></li>
+        <li><b>02</b><span>Analiza con los <b>análisis guiados</b> o escribe tu propio código.</span></li>
+        <li><b>03</b><span>Marca cada hipótesis del <b>Ishikawa</b> como confirmada o descartada.</span></li>
+        <li><b>04</b><span>Elige la <b>causa raíz</b> y la <b>acción correctiva</b>, y entrega el informe.</span></li>
+      </ol>
+    </div>
+    <div class="casos" id="casos"></div>
+
+    <section class="card gloss" id="glosario" aria-labelledby="gTitle">
+      <div class="sec-h"><h2 id="gTitle">Glosario · términos y técnicas</h2><span class="mono">lo que usa el juego</span></div>
+      <div class="gloss-grid">
+        <div>
+          <h3>Análisis de causa raíz</h3>
+          <dl>
+            <dt>Causa raíz</dt>
+            <dd>La causa más profunda que, si se elimina, evita que la falla vuelva a ocurrir. No es la pieza que se rompió ni la condición que la gatilló: es el <b>porqué de fondo</b>, que muchas veces está en un método, un material o un cambio.</dd>
+            <dt>Síntoma, condición y causa</dt>
+            <dd>El <b>síntoma</b> es lo que ves (una alarma). La <b>condición</b> lo gatilla (el frío). La <b>causa raíz</b> explica por qué esa condición produce la falla aquí y no en otra parte (un calefactor apagado).</dd>
+            <dt>Diagrama de Ishikawa (6M)</dt>
+            <dd>También llamado espina de pescado. Ordena las hipótesis en seis familias: <b>Máquina, Método, Material, Medio ambiente, Medición y Mano de obra</b>. Sirve para no quedarse con la primera idea.</dd>
+            <dt>5 porqués</dt>
+            <dd>Preguntar "¿por qué?" sobre cada respuesta, unas cinco veces, hasta llegar a algo que se pueda corregir. Cada respuesta debe estar respaldada por datos.</dd>
+            <dt>Acción correctiva y contención</dt>
+            <dd>La <b>contención</b> (un reset, un relleno) devuelve la turbina a servicio, pero la falla vuelve. La <b>acción correctiva</b> elimina la causa raíz y además evita que se repita en otras turbinas.</dd>
+            <dt>Gestión del cambio</dt>
+            <dd>Verificar el efecto de cada cambio (firmware, lubricante, procedimiento) antes y después de aplicarlo. Muchas fallas comienzan justo después de un cambio.</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>Análisis de datos</h3>
+          <dl>
+            <dt>Pareto (80/20)</dt>
+            <dd>Ordenar los problemas de mayor a menor impacto y ver el porcentaje acumulado. Pocas causas explican la mayor parte de la pérdida. <b>El criterio importa:</b> no es lo mismo ordenar por cantidad de eventos que por energía perdida.</dd>
+            <dt>Bad actor</dt>
+            <dd>Un equipo que concentra una proporción desproporcionada de fallas. Si un problema se concentra en dos turbinas, la causa suele ser local y no de diseño.</dd>
+            <dt>Correlación no es causalidad</dt>
+            <dd>Dos variables pueden moverse juntas porque una tercera las mueve a ambas. Una turbina con más viento produce más <i>y</i> se calienta más, sin estar fallando.</dd>
+            <dt>Normalizar por carga (residuo)</dt>
+            <dd>Se ajusta un modelo de lo esperado, por ejemplo <code>temp = a + b × potencia + c × temp_amb</code> con mínimos cuadrados, y se mira el <code>residuo = real − esperado</code>. Así se comparan turbinas en igualdad de condiciones.</dd>
+            <dt>Media móvil</dt>
+            <dd>Promedio de una ventana que se desplaza (por ejemplo 3 días). Suaviza el ruido para que aparezca la tendencia o el salto.</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>Python y pandas</h3>
+          <dl>
+            <dt>DataFrame</dt>
+            <dd>Una tabla con columnas con nombre. Cada conjunto de evidencia (<code>alarmas</code>, <code>scada</code>…) es un DataFrame.</dd>
+            <dt>Filtrar</dt>
+            <dd><code>df[df['turbina'] == 'WTG-04']</code> deja solo las filas que cumplen la condición.</dd>
+            <dt>Contar y agrupar</dt>
+            <dd><code>df['codigo'].value_counts()</code> cuenta los valores. <code>df.groupby('turbina')['mwh'].sum()</code> suma por grupo.</dd>
+            <dt>Unir y tabular</dt>
+            <dd><code>a.merge(b, on='turbina')</code> une dos tablas por una columna común. <code>pivot_table</code> arma una tabla de doble entrada.</dd>
+            <dt>Gráficos del juego</dt>
+            <dd><code>grafico_barras(serie, titulo)</code>, <code>grafico_lineas(tabla, titulo)</code> y <code>grafico_dispersion(x, y, titulo, grupo=None)</code>. La última línea de cada celda se muestra como tabla.</dd>
+            <dt>Tu consola</dt>
+            <dd>Tus variables se mantienen entre consultas. Si modificas un dataset, los análisis guiados igual parten de los datos originales. Python corre en tu navegador: un bucle infinito congela la página, y en ese caso hay que recargarla.</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>Puntaje</h3>
+          <dl>
+            <dt>Cómo se calcula (100 puntos)</dt>
+            <dd><b>Causa raíz</b> 40 · <b>acción correctiva</b> 20 · <b>hipótesis</b> 30, repartidos entre las del caso (una sin evaluar suma 0) · <b>eficiencia</b> 10.</dd>
+            <dt>Eficiencia</dt>
+            <dd>Cada ejecución de código es una consulta. Si usas las del par del caso o menos, ganas 10 puntos, y pierdes 2 por cada consulta extra. Si entregas con menos de 2 consultas, es una apuesta sin evidencia y no suma.</dd>
+            <dt>Estrellas</dt>
+            <dd>★★★ desde 90 puntos · ★★ desde 70 · ★ desde 50. Tu mejor puntaje queda guardado en este navegador.</dd>
+            <dt>Los datos</dt>
+            <dd>Son simulados con Python (numpy y pandas) a partir de mecanismos de falla reales, y se generan igual en cada partida para que el caso sea reproducible.</dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+    <p class="foot">Python corre en tu navegador con Pyodide (WebAssembly): nada se envía a un servidor. Casos y datos simulados con fines educativos. Diseñado por Cristianfer Silva Portillo.</p>
+  </section>
+
+  <!-- Caso -->
+  <section id="vCaso" hidden>
+    <div class="caso-top">
+      <button class="back" type="button" data-act="home">← Casos</button>
+      <div class="grow"><span class="eyebrow" id="cNivel"></span><h2 id="cTitulo"></h2></div>
+      <div class="cons">Consultas<b id="cCons">0</b><span id="cPar"></span></div>
+    </div>
+    <div class="caso-grid">
+      <div class="col-main">
+        <article class="card brief" id="cBrief"></article>
+        <details class="card evid" open><summary>Evidencia disponible</summary><ul id="cDatos"></ul></details>
+        <section class="card" aria-label="Análisis guiados">
+          <div class="sec-h"><h3>Análisis guiados</h3><span class="mono">cargan su código y parten de los datos originales</span></div>
+          <div class="guias" id="cGuias"></div>
+        </section>
+        <section class="card editor" aria-label="Consola Python">
+          <div class="sec-h"><h3>Consola Python</h3><span class="mono">Ctrl / ⌘ + Enter para ejecutar</span></div>
+          <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Código Python"></textarea>
+          <div class="ed-bar">
+            <button class="btn primary" type="button" data-act="run" id="runBtn" disabled>Ejecutar ▸</button>
+            <button class="btn ghost" type="button" data-act="clear">Limpiar resultados</button>
+            <small>pd · np · grafico_barras · grafico_lineas · grafico_dispersion</small>
+          </div>
+        </section>
+        <div class="out" id="out"></div>
+      </div>
+      <aside class="col-side">
+        <section class="card" aria-label="Diagrama de Ishikawa">
+          <div class="sec-h"><h3>Ishikawa · hipótesis</h3><span class="mono" id="hipCount"></span></div>
+          <svg class="fish" id="fish" viewBox="0 0 360 120" aria-hidden="true"></svg>
+          <div id="cHip"></div>
+        </section>
+        <section class="card dict" aria-label="Dictamen">
+          <div class="sec-h"><h3>Dictamen</h3><span class="mono">informe de causa raíz</span></div>
+          <fieldset><legend>Causa raíz</legend><div id="cCausas"></div></fieldset>
+          <fieldset><legend>Acción correctiva</legend><div id="cAcc"></div></fieldset>
+          <button class="btn primary" type="button" data-act="submit" id="submitBtn" disabled>Entregar informe</button>
+          <small id="submitHint">Elige una causa raíz y una acción para entregar.</small>
+        </section>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<dialog id="dRes"><div class="dlg" id="resBody"></div></dialog>
+
+<!-- Motor Python: datos de los casos, ejecución de celdas y gráficos -->
+<script type="text/x-python" id="motor">
+# Motor del juego: datos de cada caso, ejecución de celdas y gráficos
+import ast, json, sys, traceback
+import numpy as np
+import pandas as pd
+
+pd.set_option('display.width', 120)
+pd.set_option('display.max_columns', 20)
+
+try:
+    import js
+    def _envia(spec):
+        js.window.dfGraficar(json.dumps(spec))
+
+    class _Salida:
+        """Envía print() a la página tal cual, aunque no termine en salto de línea."""
+        def write(self, s):
+            if s:
+                js.window.dfEscribir(s)
+            return len(s)
+
+        def flush(self):
+            pass
+
+    sys.stdout = sys.stderr = _Salida()
+except ImportError:  # pruebas fuera del navegador
+    def _envia(spec):
+        print('[gráfico]', spec['tipo'], '·', spec.get('titulo', ''))
+
+TURB = [f'WTG-{i:02d}' for i in range(1, 13)]
+
+
+def _num(v):
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return None
+    return None if np.isnan(f) else f
+
+
+def grafico_barras(serie, titulo=''):
+    """Barras horizontales: el índice de la serie son las etiquetas."""
+    s = pd.Series(serie).head(30)
+    _envia({'tipo': 'barras', 'titulo': titulo, 'x': [str(i) for i in s.index],
+            'series': [{'nombre': '' if s.name is None else str(s.name), 'y': [_num(v) for v in s.values]}]})
+
+
+def grafico_lineas(tabla, titulo=''):
+    """Una línea por columna; el índice es el eje X."""
+    df = pd.DataFrame(tabla)
+    _envia({'tipo': 'lineas', 'titulo': titulo, 'x': [str(i) for i in df.index],
+            'series': [{'nombre': str(c), 'y': [_num(v) for v in df[c].values]} for c in df.columns]})
+
+
+def grafico_dispersion(x, y, titulo='', grupo=None, max_puntos=4000):
+    """Nube de puntos; 'grupo' (opcional) colorea por categoría."""
+    d = pd.DataFrame({'x': np.asarray(x, dtype=float), 'y': np.asarray(y, dtype=float)})
+    d['g'] = np.asarray(grupo).astype(str) if grupo is not None else ''
+    if len(d) > max_puntos:
+        d = d.sample(max_puntos, random_state=0)
+    series = [{'nombre': str(g), 'x': [_num(v) for v in s['x']], 'y': [_num(v) for v in s['y']]}
+              for g, s in d.groupby('g')]
+    ejes = [str(getattr(x, 'name', None) or 'x'), str(getattr(y, 'name', None) or 'y')]
+    _envia({'tipo': 'dispersion', 'titulo': titulo, 'series': series, 'ejes': ejes})
+
+
+# ---------------------------------------------------------------------------
+# Caso 1 · Pareto de alarmas
+# ---------------------------------------------------------------------------
+def caso1():
+    rng = np.random.default_rng(101)
+    ini = pd.Timestamp('2025-01-01')
+    tipos = [
+        # código, descripción, eventos, pesos por turbina, duración media (min), MW perdidos mientras dura
+        ('COM-101', 'Pérdida de comunicación SCADA', 1150, None, 18, 0.0),
+        ('TMP-305', 'Sobretemperatura góndola (derrateo)', 420, None, 60, 0.3),
+        ('ENV-210', 'Parada por viento extremo (> 25 m/s)', 260, None, 95, 0.0),
+        ('YAW-520', 'Error de orientación (yaw)', 180, None, 45, 1.2),
+        ('HID-412', 'Baja presión hidráulica', 140, {'WTG-04': 0.43, 'WTG-09': 0.37}, 380, 1.35),
+        ('RED-700', 'Hueco de tensión en la red', 90, None, 12, 1.1),
+        ('CNV-630', 'Disparo de convertidor', 75, None, 150, 1.2),
+    ]
+    filas = []
+    for cod, desc, n, pesos, dur, mw in tipos:
+        if pesos:
+            resto = (1 - sum(pesos.values())) / (12 - len(pesos))
+            p = np.array([pesos.get(t, resto) for t in TURB])
+        else:
+            p = rng.dirichlet(np.full(12, 8.0))
+        turb = rng.choice(TURB, size=n, p=p)
+        minutos = rng.uniform(0, 365 * 24 * 60, size=n)
+        duracion = np.maximum(2, rng.gamma(2.0, dur / 2.0, size=n)).round()
+        perdida = duracion / 60 * mw * rng.uniform(0.6, 1.4, size=n)
+        for t, m, d, e in zip(turb, minutos, duracion, perdida):
+            filas.append((ini + pd.Timedelta(minutes=int(m)), t, cod, desc, int(d), round(float(e), 2)))
+    alarmas = pd.DataFrame(filas, columns=['fecha_hora', 'turbina', 'codigo', 'descripcion',
+                                           'duracion_min', 'energia_perdida_mwh'])
+    alarmas = alarmas.sort_values('fecha_hora').reset_index(drop=True)
+
+    ot = pd.DataFrame([
+        ('2025-02-11', 'WTG-04', 'Hidráulico', 'Alarma HID-412. Relleno de 4 L de aceite y reset. Sin fugas visibles.', 6),
+        ('2025-03-02', 'WTG-09', 'Hidráulico', 'Alarma HID-412. Relleno de 3 L de aceite y reset. Sin fugas visibles.', 5),
+        ('2025-03-27', 'WTG-04', 'Hidráulico', 'Cambio de presostato por sospecha de lectura falsa. La alarma se repite a los 3 días.', 8),
+        ('2025-04-15', 'WTG-02', 'Comunicación', 'Cambio de switch de fibra en la base de la torre.', 3),
+        ('2025-05-08', 'WTG-09', 'Hidráulico', 'Revisión de mangueras y conexiones: sin fugas. Reset.', 5),
+        ('2025-06-19', 'WTG-04', 'Hidráulico', 'Manómetro externo confirma caída a 115 bar al mover el pitch.', 7),
+        ('2025-07-03', 'WTG-11', 'Orientación', 'Ajuste de freno de yaw.', 4),
+        ('2025-08-21', 'WTG-09', 'Hidráulico', 'Relleno de 2 L de aceite y reset.', 4),
+        ('2025-09-10', 'WTG-06', 'Convertidor', 'Cambio de ventilador del módulo de potencia.', 6),
+        ('2025-10-14', 'WTG-04', 'Hidráulico', 'Alarma HID-412. Reset remoto; vuelve a parar al día siguiente.', 2),
+        ('2025-11-05', 'WTG-07', 'Mantención', 'Mantención semestral sin hallazgos.', 16),
+        ('2025-12-02', 'WTG-09', 'Hidráulico', 'Alarma HID-412. Reset y relleno de 2 L.', 5),
+    ], columns=['fecha', 'turbina', 'sistema', 'descripcion', 'horas_hombre'])
+    ot['fecha'] = pd.to_datetime(ot['fecha'])
+
+    dias = pd.date_range(ini, periods=365, freq='D')
+    partes = []
+    for t in TURB:
+        if t in ('WTG-04', 'WTG-09'):
+            arr = rng.normal(23 if t == 'WTG-04' else 20, 2.5, 365)
+            pmin = rng.normal(118, 7, 365)
+        else:
+            arr = rng.normal(6, 1.0, 365)
+            pmin = rng.normal(161, 4, 365)
+        cons = np.abs(rng.normal(0.02, 0.008, 365))
+        partes.append(pd.DataFrame({'fecha': dias, 'turbina': t, 'arranques_bomba_h': arr.round(1),
+                                    'presion_min_bar': pmin.round(1), 'consumo_aceite_l': cons.round(3)}))
+    hidraulica = pd.concat(partes, ignore_index=True)
+    return {'alarmas': alarmas, 'ot': ot, 'hidraulica': hidraulica}
+
+
+# ---------------------------------------------------------------------------
+# Caso 2 · Pitch en mañanas frías
+# ---------------------------------------------------------------------------
+def _ar1(rng, n, phi, sigma):
+    e = rng.normal(0, sigma, n)
+    out = np.empty(n)
+    x = 0.0
+    for i in range(n):
+        x = phi * x + e[i]
+        out[i] = x
+    return out
+
+
+def caso2():
+    rng = np.random.default_rng(202)
+    horas = pd.date_range('2025-05-01', '2025-09-30 23:00', freq='h')
+    n = len(horas)
+    doy, hr = horas.dayofyear.values, horas.hour.values
+    temp = (11 + 4 * np.cos((doy - 15) / 365 * 2 * np.pi)
+            - 5.5 * np.cos((hr - 6) / 24 * 2 * np.pi) + _ar1(rng, n, 0.985, 0.35))
+    viento = np.clip(7 + 2.5 * np.sin((hr - 10) / 24 * 2 * np.pi) + rng.normal(0, 2.0, n), 0, 22)
+    clima = pd.DataFrame({'fecha_hora': horas, 'temp_c': temp.round(1), 'viento_ms': viento.round(1)})
+
+    fw = pd.Timestamp('2025-06-10')
+    turbinas = pd.DataFrame({
+        'turbina': TURB,
+        'firmware': ['3.2'] * 6 + ['3.1'] * 6,
+        'fecha_firmware': [fw + pd.Timedelta(days=i % 3) for i in range(6)] + [pd.Timestamp('2024-11-20')] * 6,
+        'edad_baterias_meses': [38, 3, 51, 22, 3, 45, 29, 3, 56, 17, 41, 33],  # WTG-02, 05 y 08: baterías nuevas en junio
+        'proveedor_baterias': ['A', 'B', 'A', 'A', 'B', 'B', 'A', 'B', 'A', 'B', 'A', 'A'],
+    })
+
+    partes, eventos = [], []
+    for i, t in enumerate(TURB):
+        sin_calefactor = (horas >= turbinas.loc[i, 'fecha_firmware']) if i < 6 else np.zeros(n, bool)
+        propio = temp + 3.0
+        con_calefactor = np.maximum(propio, 11 + rng.normal(0, 0.6, n))
+        g = np.where(sin_calefactor, propio, con_calefactor) + rng.normal(0, 0.8, n)
+        partes.append(pd.DataFrame({'fecha_hora': horas, 'turbina': t, 'temp_gabinete_c': g.round(1)}))
+        # La prueba de baterías falla con el gabinete frío y el pitch en movimiento
+        p = np.where(g < 3, 0.18, 0.0) * (viento > 4) + 0.0003
+        for h in np.flatnonzero(rng.random(n) < p):
+            frio = g[h] < 3
+            eventos.append((horas[h] + pd.Timedelta(minutes=int(rng.integers(0, 60))), t, int(rng.integers(1, 4)),
+                            'PIT-215', 'Batería de pitch: baja tensión en prueba',
+                            round(float(rng.normal(196 if frio else 205, 4)), 1)))
+    gabinete = pd.concat(partes, ignore_index=True)
+    alarmas = pd.DataFrame(eventos, columns=['fecha_hora', 'turbina', 'eje', 'codigo', 'descripcion', 'tension_v'])
+    alarmas = alarmas.sort_values('fecha_hora').reset_index(drop=True)
+    return {'alarmas': alarmas, 'clima': clima, 'turbinas': turbinas, 'gabinete': gabinete}
+
+
+# ---------------------------------------------------------------------------
+# Caso 3 · Multiplicadoras calientes
+# ---------------------------------------------------------------------------
+def caso3():
+    rng = np.random.default_rng(303)
+    horas = pd.date_range('2025-06-01', '2025-10-31 23:00', freq='h')
+    n = len(horas)
+    doy, hr = horas.dayofyear.values, horas.hour.values
+    amb = (12 + 3 * np.cos((doy - 15) / 365 * 2 * np.pi)
+           - 4 * np.cos((hr - 6) / 24 * 2 * np.pi) + rng.normal(0, 1.2, n))
+    v0 = np.clip(7.5 + 3.2 * _ar1(rng, n, 0.98, 0.17) + 1.5 * np.sin((hr - 10) / 24 * 2 * np.pi), 0, None)
+    sitio = {'WTG-01': 1.22, 'WTG-11': 1.25, 'WTG-12': 1.3, 'WTG-03': 0.88, 'WTG-08': 0.9, 'WTG-10': 0.86}
+    afectadas = ('WTG-03', 'WTG-08', 'WTG-10')
+    cambio = {t: pd.Timestamp('2025-08-18') + pd.Timedelta(days=i % 5) for i, t in enumerate(TURB)}
+
+    partes = []
+    for t in TURB:
+        v = np.clip(v0 * sitio.get(t, 1.0) + rng.normal(0, 0.6, n), 0, None)
+        p = np.where((v >= 3) & (v < 25), 2300 * np.clip((v ** 3 - 27) / (12.5 ** 3 - 27), 0, 1), 0)
+        carga = p / 2300
+        mal = (horas >= cambio[t]) if t in afectadas else np.zeros(n, bool)
+        extra = np.where(mal, 4 + 9 * carga, 0)
+        rod = amb + 20 + 22 * carga + extra + rng.normal(0, 1.0, n)
+        aceite = amb + 15 + 18 * carga + 0.7 * extra + rng.normal(0, 0.8, n)
+        vib = 2.0 + 0.9 * carga + np.abs(rng.normal(0, 0.25, n))
+        partes.append(pd.DataFrame({'fecha_hora': horas, 'turbina': t, 'viento_ms': v.round(1),
+                                    'potencia_kw': p.round(0), 'temp_amb_c': amb.round(1),
+                                    'temp_rod_mult_c': rod.round(1), 'temp_aceite_c': aceite.round(1),
+                                    'vibracion_mm_s': vib.round(2)}))
+    scada = pd.concat(partes, ignore_index=True)
+    advertencias = (scada.loc[scada['temp_rod_mult_c'] > 66, ['fecha_hora', 'turbina', 'temp_rod_mult_c', 'potencia_kw']]
+                    .reset_index(drop=True))
+
+    filas = [(cambio[t], t, 'Cambio de aceite de multiplicadora (600 L)', 'B-2207' if t in afectadas else 'A-1983')
+             for t in TURB]
+    filas += [(pd.Timestamp('2025-06-25'), 'WTG-05', 'Cambio de filtro en línea de aceite', None),
+              (pd.Timestamp('2025-07-09'), 'WTG-12', 'Inspección boroscópica de multiplicadora: sin hallazgos', None),
+              (pd.Timestamp('2025-09-24'), 'WTG-08', 'Limpieza del radiador del enfriador de aceite', None)]
+    mantenimiento = (pd.DataFrame(filas, columns=['fecha', 'turbina', 'actividad', 'lote_aceite'])
+                     .sort_values(['fecha', 'turbina']).reset_index(drop=True))
+
+    aceite = pd.DataFrame({
+        'turbina': TURB,
+        'fecha_muestra': pd.Timestamp('2025-09-15'),
+        'lote': ['B-2207' if t in afectadas else 'A-1983' for t in TURB],
+        'grado_especificado': 'ISO VG 220',
+        'viscosidad_40c_cst': [round(float(rng.normal(148, 3) if t in afectadas else rng.normal(219, 3)), 1) for t in TURB],
+        'agua_ppm': rng.normal(160, 35, 12).round(0),
+        'codigo_iso_particulas': rng.choice(['17/15/12', '18/16/13', '17/14/12'], 12),
+    })
+    return {'scada': scada, 'advertencias': advertencias, 'mantenimiento': mantenimiento, 'aceite': aceite}
+
+
+# ---------------------------------------------------------------------------
+# Ejecución de celdas
+# ---------------------------------------------------------------------------
+NS = {}
+_CACHE = {}
+_ACTUAL = [None]
+
+
+def _sin_input(*args, **kwargs):
+    raise RuntimeError('input() no está disponible aquí: escribe los valores directamente en el código')
+
+
+def _restaurar():
+    """Devuelve los datos y funciones del caso a su estado original (las variables propias se mantienen)."""
+    NS.update({'pd': pd, 'np': np, 'grafico_barras': grafico_barras, 'grafico_lineas': grafico_lineas,
+               'grafico_dispersion': grafico_dispersion, 'input': _sin_input})
+    NS.update({k: v.copy() for k, v in _CACHE[_ACTUAL[0]].items()})
+
+
+def _nuevo_caso(n):
+    if n not in _CACHE:
+        _CACHE[n] = {1: caso1, 2: caso2, 3: caso3}[n]()
+    _ACTUAL[0] = n
+    NS.clear()
+    _restaurar()
+    return json.dumps({k: [int(v.shape[0]), int(v.shape[1])] for k, v in _CACHE[n].items()})
+
+
+def _formatear(val):
+    if isinstance(val, pd.Series):
+        val = val.to_frame()
+    if isinstance(val, pd.DataFrame):
+        html = val.to_html(max_rows=30, max_cols=12, border=0, classes='df', na_rep='—',
+                           float_format=lambda v: f'{v:.2f}')
+        return json.dumps({'html': html, 'filas': int(len(val)), 'columnas': int(val.shape[1])})
+    return json.dumps({'texto': repr(val)})
+
+
+def _correr(codigo, restaurar=False):
+    # Los análisis guiados parten siempre de los datos originales
+    if restaurar:
+        _restaurar()
+    try:
+        arbol = ast.parse(codigo, filename='<celda>', mode='exec')
+        ultimo = None
+        if arbol.body and isinstance(arbol.body[-1], ast.Expr):
+            ultimo = ast.Expression(arbol.body.pop().value)
+        exec(compile(arbol, '<celda>', 'exec'), NS)
+        if ultimo is not None:
+            val = eval(compile(ultimo, '<celda>', 'eval'), NS)
+            if val is not None:
+                return _formatear(val)
+        return None
+    except SyntaxError as e:
+        return json.dumps({'error': f'SyntaxError: {e.msg}', 'linea': e.lineno})
+    except Exception as e:
+        linea = next((f.lineno for f in reversed(traceback.extract_tb(e.__traceback__)) if f.filename == '<celda>'), None)
+        return json.dumps({'error': f'{type(e).__name__}: {e}', 'linea': linea})
+</script>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
+<script>
+'use strict';
+/* =========================================================
+   1. Casos
+   ========================================================= */
+const GUIAS = {
+ "1": [
+  [
+   "Explorar el registro de alarmas",
+   "print(alarmas.shape)\nalarmas.head(10)"
+  ],
+  [
+   "Pareto por frecuencia",
+   "frecuencia = alarmas['descripcion'].value_counts()\ngrafico_barras(frecuencia, 'Eventos por tipo de alarma')\nfrecuencia"
+  ],
+  [
+   "Pareto por energía perdida",
+   "energia = alarmas.groupby('descripcion')['energia_perdida_mwh'].sum().sort_values(ascending=False)\npareto = pd.DataFrame({\n    'MWh perdidos': energia.round(1),\n    '% acumulado': (energia.cumsum() / energia.sum() * 100).round(1),\n})\ngrafico_barras(energia, 'Energía perdida por tipo de alarma (MWh)')\npareto"
+  ],
+  [
+   "¿En qué turbinas ocurre la baja presión?",
+   "hid = alarmas[alarmas['codigo'] == 'HID-412']\npor_turbina = hid.groupby('turbina')['energia_perdida_mwh'].sum().sort_values(ascending=False).round(1)\ngrafico_barras(por_turbina, 'HID-412: energía perdida por turbina (MWh)')\npor_turbina"
+  ],
+  [
+   "Órdenes de trabajo del sistema hidráulico",
+   "ot[ot['sistema'] == 'Hidráulico']"
+  ],
+  [
+   "Bomba, presión y consumo de aceite por turbina",
+   "resumen = hidraulica.groupby('turbina')[['arranques_bomba_h', 'presion_min_bar', 'consumo_aceite_l']].mean().round(2)\ngrafico_barras(resumen['arranques_bomba_h'], 'Arranques de bomba por hora (promedio anual)')\nresumen"
+  ]
+ ],
+ "2": [
+  [
+   "Explorar las alarmas de pitch",
+   "print(len(alarmas), 'alarmas PIT-215')\nalarmas.head(10)"
+  ],
+  [
+   "Alarmas por turbina",
+   "por_turbina = alarmas['turbina'].value_counts().sort_index()\ngrafico_barras(por_turbina, 'Alarmas PIT-215 por turbina')\npor_turbina"
+  ],
+  [
+   "¿A qué hora ocurren?",
+   "por_hora = alarmas['fecha_hora'].dt.hour.value_counts().sort_index()\npor_hora.index = [f'{h:02d}:00' for h in por_hora.index]\ngrafico_barras(por_hora, 'Alarmas según la hora del día')\npor_hora"
+  ],
+  [
+   "Alarmas vs temperatura ambiente",
+   "a = alarmas.assign(hora=alarmas['fecha_hora'].dt.floor('h'))\na = a.merge(clima, left_on='hora', right_on='fecha_hora', suffixes=('', '_clima'))\nrangos = [-10, 0, 3, 6, 10, 15, 30]\ntabla = pd.DataFrame({\n    'horas en el rango': pd.cut(clima['temp_c'], rangos).value_counts().sort_index(),\n    'alarmas': pd.cut(a['temp_c'], rangos).value_counts().sort_index(),\n})\ntabla['alarmas cada 100 h'] = (tabla['alarmas'] / tabla['horas en el rango'] * 100).round(2)\ngrafico_barras(tabla['alarmas cada 100 h'], 'Alarmas cada 100 h según temperatura ambiente (°C)')\ntabla"
+  ],
+  [
+   "¿Influye la edad de las baterías?",
+   "cuenta = alarmas.groupby('turbina').size().rename('alarmas')\nt = turbinas.set_index('turbina').join(cuenta).fillna({'alarmas': 0})\ngrafico_dispersion(t['edad_baterias_meses'], t['alarmas'], 'Edad de las baterías vs alarmas')\nt[['edad_baterias_meses', 'proveedor_baterias', 'alarmas']].sort_values('edad_baterias_meses')"
+  ],
+  [
+   "Alarmas por mes según firmware",
+   "a = alarmas.merge(turbinas[['turbina', 'firmware']], on='turbina')\na['mes'] = a['fecha_hora'].dt.strftime('%Y-%m')\ntabla = a.pivot_table(index='mes', columns='firmware', values='eje', aggfunc='count', fill_value=0)\ngrafico_lineas(tabla, 'Alarmas por mes según versión de firmware')\nprint(turbinas[['turbina', 'firmware', 'fecha_firmware']].to_string(index=False))\ntabla"
+  ],
+  [
+   "Temperatura del gabinete de pitch",
+   "g = gabinete.merge(turbinas[['turbina', 'firmware']], on='turbina')\ng['dia'] = g['fecha_hora'].dt.date\ndiario = g.groupby(['dia', 'firmware'])['temp_gabinete_c'].min().unstack()\ndiario.columns = [f'gabinete fw {c}' for c in diario.columns]\ndiario['ambiente'] = clima.groupby(clima['fecha_hora'].dt.date)['temp_c'].min()\ngrafico_lineas(diario, 'Temperatura mínima diaria (°C)')\ndiario.round(1).iloc[35:45]"
+  ]
+ ],
+ "3": [
+  [
+   "Explorar los datos SCADA",
+   "print(scada.shape)\nscada.head()"
+  ],
+  [
+   "Temperatura promedio por turbina",
+   "promedio = scada.groupby('turbina')['temp_rod_mult_c'].mean().sort_values(ascending=False).round(1)\ngrafico_barras(promedio, 'Temperatura promedio del rodamiento (°C)')\npromedio"
+  ],
+  [
+   "Advertencias por turbina",
+   "por_turbina = advertencias['turbina'].value_counts()\ngrafico_barras(por_turbina, 'Horas sobre 66 °C por turbina')\npor_turbina"
+  ],
+  [
+   "Potencia promedio por turbina",
+   "potencia = scada.groupby('turbina')['potencia_kw'].mean().sort_values(ascending=False).round(0)\ngrafico_barras(potencia, 'Potencia promedio (kW)')\npotencia"
+  ],
+  [
+   "Temperatura vs potencia",
+   "grafico_dispersion(scada['potencia_kw'], scada['temp_rod_mult_c'], 'Temperatura del rodamiento vs potencia')\nscada[['potencia_kw', 'temp_amb_c', 'temp_rod_mult_c']].corr().round(2)"
+  ],
+  [
+   "Comparar a igual carga (normalizar)",
+   "X = np.column_stack([np.ones(len(scada)), scada['potencia_kw'], scada['temp_amb_c']])\ncoef, *_ = np.linalg.lstsq(X, scada['temp_rod_mult_c'], rcond=None)\nscada['residuo'] = scada['temp_rod_mult_c'] - X @ coef\nprint('Modelo: temp = {:.1f} + {:.4f} × potencia + {:.2f} × temp_amb'.format(*coef))\nresiduo = scada.groupby('turbina')['residuo'].mean().sort_values(ascending=False).round(2)\ngrafico_barras(residuo, 'Temperatura sobre lo esperado a igual carga (°C)')\nresiduo"
+  ],
+  [
+   "Evolución en el tiempo",
+   "X = np.column_stack([np.ones(len(scada)), scada['potencia_kw'], scada['temp_amb_c']])\ncoef, *_ = np.linalg.lstsq(X, scada['temp_rod_mult_c'], rcond=None)\nscada['residuo'] = scada['temp_rod_mult_c'] - X @ coef\ntop = scada.groupby('turbina')['residuo'].mean().nlargest(3).index\nd = scada.assign(grupo=np.where(scada['turbina'].isin(top), scada['turbina'], 'resto (promedio)'))\ndiario = d.pivot_table(index=d['fecha_hora'].dt.date, columns='grupo', values='residuo', aggfunc='mean')\ngrafico_lineas(diario.rolling(3, min_periods=1).mean(), 'Temperatura sobre lo esperado, media móvil 3 días (°C)')\ndiario.round(1).iloc[76:86]"
+  ],
+  [
+   "Vibración y aceite desde septiembre",
+   "sep = scada[scada['fecha_hora'] >= '2025-09-01']\nsep.groupby('turbina')[['potencia_kw', 'temp_aceite_c', 'vibracion_mm_s']].mean().round(2)"
+  ],
+  [
+   "Registro de mantenimiento",
+   "mantenimiento"
+  ],
+  [
+   "Análisis de aceite de laboratorio",
+   "aceite"
+  ]
+ ]
+};
+const CATS = ['Máquina', 'Método', 'Material', 'Medio ambiente', 'Medición', 'Mano de obra'];
+
+const CASOS = [
+  {
+    n: 1, nivel: 'Nivel 1', tecnica: 'Pareto y bad actors', titulo: '¿Dónde se pierde la energía?',
+    resumen: 'Un año de alarmas y presupuesto para atacar un solo problema. ¿Por dónde partes?',
+    tags: ['value_counts', 'groupby', 'Pareto'],
+    brief: `<span class="eyebrow">Orden de investigación · Caso 1</span>
+      <p>Gerencia aprobó presupuesto para atacar <b>un solo problema</b> del parque este año. El supervisor propone partir por la alarma que más se repite.</p>
+      <p><b>Tu tarea:</b> encontrar qué problema hace perder más energía, en qué turbinas está y cuál es su causa raíz.</p>`,
+    datos: [
+      { nombre: 'alarmas', desc: 'Registro de alarmas de 2025', cols: 'fecha_hora, turbina, codigo, descripcion, duracion_min, energia_perdida_mwh' },
+      { nombre: 'ot', desc: 'Órdenes de trabajo', cols: 'fecha, turbina, sistema, descripcion, horas_hombre' },
+      { nombre: 'hidraulica', desc: 'Resumen diario del sistema hidráulico', cols: 'fecha, turbina, arranques_bomba_h, presion_min_bar, consumo_aceite_l' },
+    ],
+    par: 6,
+    hip: [
+      { cat: 'Medición', txt: 'La alarma más frecuente (COM-101) es la que más energía hace perder', v: false,
+        por: 'COM-101 tiene 1.150 eventos y 0 MWh perdidos: la turbina sigue generando aunque se corte la comunicación.' },
+      { cat: 'Medio ambiente', txt: 'Las paradas por viento extremo son la principal pérdida evitable', v: false,
+        por: 'ENV-210 es una parada de protección por diseño: no es una falla y no se puede evitar.' },
+      { cat: 'Máquina', txt: 'La baja presión hidráulica (HID-412) se concentra en pocas turbinas', v: true,
+        por: 'WTG-04 y WTG-09 suman más del 80% de la energía perdida por HID-412: son los bad actors.' },
+      { cat: 'Máquina', txt: 'Hay una fuga externa de aceite hidráulico en WTG-04 y WTG-09', v: false,
+        por: 'El consumo de aceite es igual al del resto (0,02 L/día) y las órdenes de trabajo dicen "sin fugas visibles".' },
+      { cat: 'Medición', txt: 'El presostato entrega una lectura falsa', v: false,
+        por: 'Se cambió el presostato y la falla siguió; un manómetro externo confirmó la caída real a 115 bar.' },
+      { cat: 'Máquina', txt: 'El acumulador perdió su precarga de nitrógeno y la bomba arranca en exceso', v: true,
+        por: 'La bomba arranca 20 a 23 veces por hora (el resto, 6) y la presión mínima baja a ~118 bar sin consumo extra de aceite: el sistema no tiene reserva.' },
+      { cat: 'Método', txt: 'Los resets y rellenos de aceite resolvieron el problema', v: false,
+        por: 'La alarma se repite todo el año: los resets ocultaron el síntoma sin atacar la causa.' },
+    ],
+    causas: [
+      { txt: 'La pérdida de comunicación SCADA, porque es la alarma más frecuente del parque', ok: false },
+      { txt: 'Acumuladores hidráulicos sin precarga de nitrógeno en WTG-04 y WTG-09', ok: true },
+      { txt: 'Fugas de aceite hidráulico en el parque', ok: false },
+      { txt: 'Presostatos defectuosos que generan alarmas falsas', ok: false },
+    ],
+    acciones: [
+      { txt: 'Reemplazar los switches de comunicación de las 12 turbinas', ok: false },
+      { txt: 'Medir y recargar la precarga de los acumuladores de WTG-04 y WTG-09 (o cambiarlos) e incluir esa medición en el plan de mantención', ok: true },
+      { txt: 'Subir el umbral de la alarma de baja presión para que no detenga la turbina', ok: false },
+      { txt: 'Rellenar aceite hidráulico cada semana en las turbinas afectadas', ok: false },
+    ],
+    porques: [
+      '¿Por qué se pierde tanta energía? Porque HID-412 detiene turbinas por horas: explica ~64% de la energía perdida del año.',
+      '¿Por qué ocurre HID-412? Porque la presión cae bajo el mínimo cuando se mueve el pitch, casi solo en WTG-04 y WTG-09.',
+      '¿Por qué cae la presión si no hay fugas? Porque la bomba arranca 4 veces más de lo normal: el sistema no tiene reserva de aceite a presión.',
+      '¿Por qué no hay reserva? Porque el acumulador perdió su precarga de nitrógeno.',
+      '¿Por qué no se detectó antes? Porque el plan de mantención no incluye medir la precarga, y los resets y rellenos ocultaron el síntoma.',
+    ],
+    trampa: 'Ordenar por frecuencia lleva a atacar COM-101, que se repite mucho pero no hace perder energía. En un Pareto el criterio importa: aquí es energía perdida, no cantidad de eventos.',
+  },
+  {
+    n: 2, nivel: 'Nivel 2', tecnica: 'Condiciones y correlación', titulo: 'Pitch en las mañanas frías',
+    resumen: 'El proveedor quiere cambiar todas las baterías de pitch. ¿Son realmente las baterías?',
+    tags: ['merge', 'pd.cut', 'pivot_table'],
+    brief: `<span class="eyebrow">Orden de investigación · Caso 2</span>
+      <p>Desde junio, varias turbinas se detienen por la alarma <b>PIT-215 "Batería de pitch: baja tensión en prueba"</b>. El proveedor dice que es normal con baterías viejas en invierno y ofrece cambiar las baterías de todo el parque por <b>US$180k</b>.</p>
+      <p><b>Tu tarea:</b> decidir si el problema son las baterías y encontrar la causa raíz antes de aprobar la compra.</p>`,
+    datos: [
+      { nombre: 'alarmas', desc: 'Alarmas PIT-215 (mayo a septiembre de 2025)', cols: 'fecha_hora, turbina, eje, codigo, descripcion, tension_v' },
+      { nombre: 'clima', desc: 'Estación meteorológica del parque, horaria', cols: 'fecha_hora, temp_c, viento_ms' },
+      { nombre: 'turbinas', desc: 'Ficha de cada turbina', cols: 'turbina, firmware, fecha_firmware, edad_baterias_meses, proveedor_baterias' },
+      { nombre: 'gabinete', desc: 'Temperatura horaria del gabinete de baterías del pitch', cols: 'fecha_hora, turbina, temp_gabinete_c' },
+    ],
+    par: 6,
+    hip: [
+      { cat: 'Material', txt: 'Las baterías más antiguas son las que más fallan', v: false,
+        por: 'WTG-02 y WTG-05 tienen baterías de 3 meses y fallan tanto como las demás turbinas con firmware 3.2; WTG-09 tiene las más viejas (56 meses) y no falla.' },
+      { cat: 'Medio ambiente', txt: 'Las fallas se concentran en las madrugadas frías', v: true,
+        por: 'Casi todas ocurren entre 01:00 y 09:00, y la tasa se dispara bajo 3 °C de temperatura ambiente.' },
+      { cat: 'Máquina', txt: 'Los motores de pitch están desgastados', v: false,
+        por: 'La alarma es de tensión de batería en la prueba, no de corriente del motor, y aparece en los tres ejes, no en uno en particular.' },
+      { cat: 'Método', txt: 'Las fallas comenzaron tras la actualización a firmware 3.2', v: true,
+        por: 'Las 6 turbinas con firmware 3.2 (instalado el 10 al 12 de junio) concentran casi todas las alarmas; las de firmware 3.1 casi no tienen.' },
+      { cat: 'Máquina', txt: 'El calefactor del gabinete no mantiene la temperatura en las turbinas con firmware 3.2', v: true,
+        por: 'Desde la actualización, el gabinete con firmware 3.2 sigue a la temperatura ambiente; con firmware 3.1 no baja de ~7 °C.' },
+      { cat: 'Mano de obra', txt: 'El cambio de baterías de junio quedó mal hecho', v: false,
+        por: 'WTG-08 también recibió baterías nuevas en junio, tiene firmware 3.1 y no falla.' },
+    ],
+    causas: [
+      { txt: 'Baterías al final de su vida útil', ok: false },
+      { txt: 'El frío extremo del invierno', ok: false },
+      { txt: 'El firmware 3.2 cambió la consigna del termostato y el calefactor del gabinete ya no enciende', ok: true },
+      { txt: 'Motores de pitch con desgaste en los rodamientos', ok: false },
+    ],
+    acciones: [
+      { txt: 'Reemplazar las baterías de pitch de las 12 turbinas (US$180k)', ok: false },
+      { txt: 'Esperar al verano: el problema desaparecerá solo', ok: false },
+      { txt: 'Desactivar la prueba de baterías en las mañanas', ok: false },
+      { txt: 'Corregir la consigna del termostato en WTG-01 a 06, verificar la temperatura del gabinete y agregar la validación de parámetros al procedimiento de actualización de firmware', ok: true },
+    ],
+    porques: [
+      '¿Por qué se detienen las turbinas? Por la alarma PIT-215: la batería de pitch no pasa la prueba de tensión.',
+      '¿Por qué no pasa la prueba? Porque la batería está bajo 3 °C, y en frío entrega menos tensión.',
+      '¿Por qué está tan fría? Porque el gabinete sigue a la temperatura ambiente: el calefactor no enciende.',
+      '¿Por qué no enciende? Porque el firmware 3.2 cambió la consigna del termostato.',
+      '¿Por qué no se detectó? Porque la actualización no incluyó verificar los parámetros después de instalarla (gestión del cambio).',
+    ],
+    trampa: 'Las baterías viejas parecen culpables y el frío explica cuándo falla, pero no por qué falla solo en algunas turbinas: las de firmware 3.1 pasan el mismo frío, con baterías igual de viejas, y no fallan. El frío es la condición; la causa raíz es el cambio de firmware.',
+  },
+  {
+    n: 3, nivel: 'Nivel 3', tecnica: 'Normalizar por carga', titulo: 'Multiplicadoras calientes',
+    resumen: 'Tres turbinas dan advertencias, pero las más calientes son otras. ¿Cuáles tienen el problema?',
+    tags: ['regresión', 'residuos', 'media móvil'],
+    brief: `<span class="eyebrow">Orden de investigación · Caso 3</span>
+      <p>Desde comienzos de septiembre, <b>WTG-03, WTG-08 y WTG-10</b> dan advertencias de temperatura del rodamiento de la multiplicadora (&gt; 66 °C). El supervisor cree que el problema real está en <b>WTG-12, WTG-11 y WTG-01</b>, porque son las más calientes en promedio, y propone limitar su potencia.</p>
+      <p><b>Tu tarea:</b> identificar qué turbinas tienen realmente un problema, desde cuándo y por qué.</p>`,
+    datos: [
+      { nombre: 'scada', desc: 'Datos SCADA horarios, junio a octubre de 2025', cols: 'fecha_hora, turbina, viento_ms, potencia_kw, temp_amb_c, temp_rod_mult_c, temp_aceite_c, vibracion_mm_s' },
+      { nombre: 'advertencias', desc: 'Horas con rodamiento sobre 66 °C', cols: 'fecha_hora, turbina, temp_rod_mult_c, potencia_kw' },
+      { nombre: 'mantenimiento', desc: 'Registro de mantenimiento', cols: 'fecha, turbina, actividad, lote_aceite' },
+      { nombre: 'aceite', desc: 'Análisis de aceite de laboratorio (15 de septiembre)', cols: 'turbina, fecha_muestra, lote, grado_especificado, viscosidad_40c_cst, agua_ppm, codigo_iso_particulas' },
+    ],
+    par: 7,
+    hip: [
+      { cat: 'Medición', txt: 'Las turbinas con mayor temperatura promedio (WTG-12, 11 y 01) son las que tienen el problema', v: false,
+        por: 'Son las más ventosas: producen ~65% más y por eso se calientan más. A igual carga están normales.' },
+      { cat: 'Medio ambiente', txt: 'La temperatura del rodamiento depende de la potencia y de la temperatura ambiente', v: true,
+        por: 'Correlación de 0,87 con la potencia y 0,59 con la temperatura ambiente: hay que comparar a igual carga.' },
+      { cat: 'Máquina', txt: 'WTG-03, 08 y 10 están más calientes que el resto a igual carga', v: true,
+        por: 'Desde fines de agosto están entre 3 y 8 °C sobre lo esperado por el modelo, aunque son las que menos producen.' },
+      { cat: 'Máquina', txt: 'Los rodamientos de WTG-03, 08 y 10 ya están dañados', v: false,
+        por: 'La vibración es normal (~2,4 mm/s, igual o menor que el resto): todavía no hay daño mecánico.' },
+      { cat: 'Medición', txt: 'Los sensores de temperatura de esas turbinas están descalibrados', v: false,
+        por: 'También sube la temperatura del aceite, que es otro sensor, y el salto ocurre en tres turbinas a la vez.' },
+      { cat: 'Método', txt: 'El problema comenzó con el cambio de aceite de agosto', v: true,
+        por: 'El salto ocurre el mismo día del cambio de aceite de cada turbina (20 y 22 de agosto).' },
+      { cat: 'Material', txt: 'El aceite del lote B-2207 está fuera del grado de viscosidad especificado', v: true,
+        por: 'El laboratorio mide ~146 cSt a 40 °C: corresponde a ISO VG 150, no al VG 220 especificado (198 a 242 cSt).' },
+    ],
+    causas: [
+      { txt: 'Mayor carga en las turbinas más ventosas (WTG-12, 11 y 01)', ok: false },
+      { txt: 'Rodamientos dañados en WTG-03, 08 y 10', ok: false },
+      { txt: 'Sensores de temperatura descalibrados', ok: false },
+      { txt: 'Aceite del lote B-2207 con viscosidad ISO VG 150 en vez de VG 220, cargado en el cambio de agosto', ok: true },
+    ],
+    acciones: [
+      { txt: 'Limitar la potencia de WTG-12, 11 y 01', ok: false },
+      { txt: 'Reemplazar los rodamientos de WTG-03, 08 y 10', ok: false },
+      { txt: 'Cambiar el aceite de WTG-03, 08 y 10 por un lote certificado, bloquear el lote B-2207 y exigir análisis de recepción a cada lote nuevo', ok: true },
+      { txt: 'Subir el umbral de advertencia a 75 °C', ok: false },
+    ],
+    porques: [
+      '¿Por qué hay advertencias? Porque el rodamiento de la multiplicadora supera 66 °C en WTG-03, 08 y 10.',
+      '¿Por qué se calienta más? Porque, a igual potencia y temperatura ambiente, esas turbinas están entre 3 y 8 °C sobre lo esperado.',
+      '¿Por qué desde fines de agosto? Porque coincide con el cambio de aceite: esas tres recibieron el lote B-2207.',
+      '¿Por qué ese lote calienta? Porque su viscosidad es ~146 cSt (ISO VG 150) y la especificación es VG 220: la película lubricante es más delgada y hay más fricción.',
+      '¿Por qué se usó? Porque no existe control de calidad del lubricante al recibirlo en bodega.',
+    ],
+    trampa: 'Comparar promedios crudos apunta a las turbinas más ventosas, que se calientan porque trabajan más. Hay que comparar a igual carga: el residuo del modelo muestra el problema real y el día exacto en que empezó.',
+  },
+];
+
+/* =========================================================
+   2. Python (Pyodide)
+   ========================================================= */
+const $ = s => document.querySelector(s);
+let py = null, pyListo = false, pyError = false, caso = null, est = null, bloque = null, COL = {};
+let cargado = null;            // caso cuyos datos están cargados en Python
+const formas = {};             // filas × columnas de cada dataset, por caso
+const sesiones = {};           // progreso guardado de los casos que se dejaron a medias
+
+function setPy(txt, cls = '', ver = '') {
+  const el = $('#pySt'); el.className = 'py-st ' + cls;
+  el.children[1].textContent = txt; el.children[2].textContent = ver;
+}
+
+async function iniciarPython() {
+  try {
+    setPy('Cargando Python…');
+    py = await loadPyodide();
+    setPy('Cargando pandas…');
+    await py.loadPackage(['pandas']);
+    py.setStdout({ batched: s => escribir(s + '\n') });
+    py.setStderr({ batched: s => escribir(s + '\n') });
+    py.setStdin({ error: true });  // sin teclado: leer stdin da un error en vez de abrir un prompt
+    py.runPython($('#motor').textContent);
+    pyListo = true;
+    setPy('Python listo', 'ok', ' · pandas ' + py.runPython('pd.__version__'));
+    if (caso) cargarDatos();
+  } catch (e) {
+    pyError = true;
+    setPy('No se pudo cargar Python', 'err');
+    const vacio = $('#out .empty');
+    if (vacio) vacio.textContent = mensajeVacio();
+    console.error(e);
+  }
+}
+
+function mensajeVacio() {
+  if (pyError) return 'No se pudo cargar Python. Revisa tu conexión a internet y recarga la página.';
+  return pyListo ? 'Ejecuta un análisis guiado o tu propio código para empezar.'
+    : 'Cargando Python y pandas en tu navegador (unos segundos la primera vez)…';
+}
+
+function escribir(s) {
+  if (!bloque) return;
+  const pre = bloque.querySelector('.stdout');
+  pre.textContent += s;
+}
+// print() de Python llega aquí con sus propios saltos de línea
+window.dfEscribir = escribir;
+
+// Carga los datos del caso en Python (borra las variables propias del caso anterior)
+function cargarDatos() {
+  formas[caso.n] = JSON.parse(py.globals.get('_nuevo_caso')(caso.n));
+  cargado = caso.n;
+  pintarFormas();
+  $('#runBtn').disabled = false;
+  document.querySelectorAll('.guia').forEach(b => { b.disabled = false; });
+  const vacio = $('#out .empty');
+  if (vacio) vacio.textContent = mensajeVacio();
+}
+
+function pintarFormas() {
+  const f = formas[caso.n]; if (!f) return;
+  caso.datos.forEach(d => {
+    const el = document.querySelector(`[data-shape="${d.nombre}"]`);
+    if (el && f[d.nombre]) el.textContent = `${f[d.nombre][0].toLocaleString('es-CL')} filas × ${f[d.nombre][1]} columnas`;
+  });
+}
+
+function ejecutar(codigo, titulo, guiado = false) {
+  if (!pyListo) { toast(pyError ? 'Python no se pudo cargar: recarga la página.' : 'Python todavía se está cargando…'); return; }
+  if (!codigo.trim()) return;
+  est.consultas++;
+  actualizarConsultas();
+  const div = document.createElement('article');
+  div.className = 'card res';
+  div.innerHTML = `<div class="res-h"><b></b><span>consulta ${est.consultas}</span></div>
+    <details><summary>ver código</summary><pre></pre></details><pre class="stdout"></pre><div class="figs"></div>`;
+  div.querySelector('b').textContent = titulo || 'Tu código';
+  div.querySelector('details pre').textContent = codigo;
+  const out = $('#out');
+  out.querySelector('.empty')?.remove();
+  out.prepend(div);
+  while (out.children.length > 15) out.lastElementChild.remove();
+  bloque = div;
+  let r = null;
+  try { r = py.globals.get('_correr')(codigo, guiado); }
+  catch (e) { r = JSON.stringify({ error: String(e.message || e).trim().split('\n').slice(-1)[0] }); }
+  bloque = null;
+  if (r) {
+    const d = JSON.parse(r);
+    if (d.error) {
+      const p = document.createElement('div'); p.className = 'err';
+      p.textContent = d.error + (d.linea ? `  (línea ${d.linea})` : '');
+      div.appendChild(p);
+    } else if (d.html) {
+      const t = document.createElement('div'); t.className = 'tbl';
+      t.innerHTML = d.html + `<div class="meta">${d.filas.toLocaleString('es-CL')} filas × ${d.columnas} columnas</div>`;
+      div.appendChild(t);
+    } else {
+      const p = document.createElement('div'); p.className = 'txt'; p.textContent = d.texto; div.appendChild(p);
+    }
+  }
+  div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* =========================================================
+   3. Gráficos (llamados desde Python con dfGraficar)
+   ========================================================= */
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  for (const k of ['ink', 'muted', 'line', 'accent', 'warn', 'bad', 'ok', 'violet', 'surface-2']) COL[k] = cs.getPropertyValue('--' + k).trim();
+  COL.mono = cs.getPropertyValue('--mono');
+}
+const paleta = () => [COL.accent, COL.warn, COL.bad, COL.ok, COL.violet, COL.muted];
+
+window.dfGraficar = json => {
+  if (!bloque) return;
+  const spec = JSON.parse(json);
+  const fig = document.createElement('figure'); fig.className = 'chart'; fig.style.margin = '0';
+  fig.innerHTML = `<h4></h4><canvas></canvas><div class="legend"></div>`;
+  fig.querySelector('h4').textContent = spec.titulo || '';
+  bloque.querySelector('.figs').appendChild(fig);
+  fig._spec = spec;
+  dibujar(fig);
+};
+
+function fmtNum(v) {
+  const a = Math.abs(v);
+  return v.toLocaleString('es-CL', { maximumFractionDigits: a >= 100 ? 0 : a >= 10 ? 1 : 2 });
+}
+function niceRange(min, max) {
+  if (min === max) { min -= 1; max += 1; }
+  const pad = (max - min) * 0.06;
+  return [min >= 0 ? Math.max(0, min - pad) : min - pad, max + pad];
+}
+
+function dibujar(fig) {
+  const spec = fig._spec, cv = fig.querySelector('canvas'), leg = fig.querySelector('.legend');
+  const w = cv.clientWidth || 600;
+  const h = spec.tipo === 'barras' ? Math.max(80, spec.x.length * 24 + 16) : 240;
+  const dpr = window.devicePixelRatio || 1;
+  cv.style.height = h + 'px'; cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h);
+  x.font = `11px ${COL.mono}`; x.textBaseline = 'middle';
+  const pal = paleta();
+  leg.innerHTML = '';
+
+  const hayDatos = spec.series.some(s => s.y.some(v => v != null));
+  if (!hayDatos) {
+    x.fillStyle = COL.muted; x.textAlign = 'center';
+    x.fillText('Sin datos numéricos para graficar', w / 2, h / 2);
+    return;
+  }
+
+  if (spec.tipo === 'barras') {
+    const ys = spec.series[0].y.map(v => v ?? 0);
+    const labW = Math.min(w * 0.42, Math.max(...spec.x.map(l => x.measureText(l).width)) + 10);
+    const maxV = Math.max(0, ...ys), minV = Math.min(0, ...ys);
+    const valW = 64, L = labW, R = w - valW, span = (maxV - minV) || 1;
+    const zero = L + (0 - minV) / span * (R - L);
+    spec.x.forEach((lab, i) => {
+      const y = 8 + i * 24, v = ys[i];
+      x.fillStyle = COL.ink; x.textAlign = 'right';
+      let t = lab; while (x.measureText(t).width > labW - 10 && t.length > 4) t = t.slice(0, -2);
+      x.fillText(t === lab ? lab : t + '…', L - 8, y + 9);
+      const bx = Math.min(zero, zero + v / span * (R - L)), bw = Math.abs(v / span * (R - L));
+      x.fillStyle = v < 0 ? COL.warn : COL.accent; x.fillRect(bx, y + 1, Math.max(1, bw), 16);
+      x.fillStyle = COL.muted; x.textAlign = 'left';
+      x.fillText(fmtNum(v), (v < 0 ? zero : bx + bw) + 6, y + 9);
+    });
+    x.strokeStyle = COL.line; x.beginPath(); x.moveTo(zero, 4); x.lineTo(zero, h - 4); x.stroke();
+    return;
+  }
+
+  const L = 52, R = w - 10, T = 10, B = h - 26;
+  let xs, xmin, xmax;
+  const allY = spec.series.flatMap(s => s.y).filter(v => v != null);
+  let [ymin, ymax] = niceRange(Math.min(...allY), Math.max(...allY));
+  if (spec.tipo === 'lineas') { xmin = 0; xmax = Math.max(1, spec.x.length - 1); }
+  else {
+    const allX = spec.series.flatMap(s => s.x).filter(v => v != null);
+    [xmin, xmax] = niceRange(Math.min(...allX), Math.max(...allX));
+  }
+  const X = v => L + (v - xmin) / (xmax - xmin) * (R - L), Y = v => B - (v - ymin) / (ymax - ymin) * (B - T);
+  // Ejes y grilla
+  x.strokeStyle = COL.line; x.fillStyle = COL.muted; x.lineWidth = 1; x.textAlign = 'right';
+  for (let k = 0; k <= 4; k++) {
+    const v = ymin + (ymax - ymin) * k / 4, y = Y(v);
+    x.globalAlpha = .6; x.beginPath(); x.moveTo(L, y); x.lineTo(R, y); x.stroke(); x.globalAlpha = 1;
+    x.fillText(fmtNum(v), L - 6, y);
+  }
+  x.textAlign = 'center';
+  if (spec.tipo === 'lineas') {
+    const n = spec.x.length, ticks = Math.min(n, Math.max(2, Math.floor((R - L) / 95)));
+    for (let k = 0; k < ticks; k++) {
+      const i = Math.round(k * (n - 1) / Math.max(1, ticks - 1));
+      x.textAlign = k === 0 ? 'left' : k === ticks - 1 ? 'right' : 'center';
+      x.fillText(spec.x[i], k === 0 ? L : k === ticks - 1 ? R : X(i), h - 10);
+    }
+    spec.series.forEach((s, j) => {
+      x.strokeStyle = pal[j % pal.length]; x.lineWidth = 1.8; x.beginPath();
+      let on = false;
+      s.y.forEach((v, i) => { if (v == null) { on = false; return; } on ? x.lineTo(X(i), Y(v)) : x.moveTo(X(i), Y(v)); on = true; });
+      x.stroke();
+    });
+  } else {
+    for (let k = 0; k <= 4; k++) { const v = xmin + (xmax - xmin) * k / 4; x.fillText(fmtNum(v), clampX(X(v), w), h - 10); }
+    spec.series.forEach((s, j) => {
+      x.fillStyle = pal[j % pal.length]; x.globalAlpha = s.x.length > 300 ? .35 : .85;
+      s.x.forEach((vx, i) => { const vy = s.y[i]; if (vx == null || vy == null) return; x.fillRect(X(vx) - 1.5, Y(vy) - 1.5, 3, 3); });
+    });
+    x.globalAlpha = 1;
+    if (spec.ejes) { x.textAlign = 'right'; x.fillText(`x: ${spec.ejes[0]} · y: ${spec.ejes[1]}`, R, T + 4); }
+  }
+  if (spec.series.length > 1 || (spec.series[0] && spec.series[0].nombre)) {
+    leg.innerHTML = spec.series.map((s, j) => `<span><i style="background:${pal[j % pal.length]}"></i>${escapar(s.nombre)}</span>`).join('');
+  }
+}
+const clampX = (v, w) => Math.max(24, Math.min(w - 24, v));
+const escapar = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* =========================================================
+   4. Vistas
+   ========================================================= */
+const STORE = 'detective-fallas-v1';
+function mejores() { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch (e) { return {}; } }
+function guardarMejor(n, pts) {
+  const m = mejores();
+  if (!m[n] || pts > m[n]) { m[n] = pts; try { localStorage.setItem(STORE, JSON.stringify(m)); } catch (e) {} }
+}
+const estrellas = p => p >= 90 ? '★★★' : p >= 70 ? '★★☆' : p >= 50 ? '★☆☆' : '☆☆☆';
+
+function renderHome() {
+  const m = mejores();
+  $('#casos').innerHTML = CASOS.map(c => `
+    <button class="caso-card" type="button" data-act="open" data-n="${c.n}">
+      <span class="eyebrow">${c.nivel} · ${c.tecnica}</span>
+      <h3>${c.titulo}</h3>
+      <p>${c.resumen}</p>
+      <span class="tags">${c.tags.map(t => `<span class="tag">${t}</span>`).join('')}</span>
+      ${m[c.n] != null ? `<span class="best">Mejor puntaje: ${m[c.n]} · ${estrellas(m[c.n])}</span>` : ''}
+      <span class="go">${sesiones[c.n] ? `Continuar investigación (${sesiones[c.n].est.consultas} consultas) →` : 'Investigar →'}</span>
+    </button>`).join('');
+}
+
+function mostrar(vista) {
+  $('#vHome').hidden = vista !== 'home';
+  $('#vCaso').hidden = vista !== 'caso';
+  window.scrollTo({ top: 0 });
+}
+
+// Guarda el progreso del caso abierto para poder volver a él (si no se entregó el informe)
+function salirDelCaso() {
+  if (!caso || !est || $('#vCaso').hidden) return;
+  if (est.entregado) { delete sesiones[caso.n]; return; }
+  const out = document.createDocumentFragment();
+  while ($('#out').firstChild) out.appendChild($('#out').firstChild);
+  sesiones[caso.n] = { est, out, code: $('#code').value };
+}
+
+function abrirCaso(n, nuevo = false) {
+  salirDelCaso();
+  const s = nuevo ? null : sesiones[n];
+  delete sesiones[n];
+  caso = CASOS.find(c => c.n === n);
+  est = s ? s.est : { consultas: 0, hip: {}, causa: null, accion: null, usadas: [], entregado: false, informe: '' };
+  $('#cNivel').textContent = `${caso.nivel} · ${caso.tecnica}`;
+  $('#cTitulo').textContent = caso.titulo;
+  $('#cBrief').innerHTML = caso.brief;
+  $('#cDatos').innerHTML = caso.datos.map(d => `<li><code>${d.nombre}</code> · ${d.desc} <span class="mono" style="font-size:11px;color:var(--muted)" data-shape="${d.nombre}"></span><span class="cols">${d.cols}</span></li>`).join('');
+  $('#cGuias').innerHTML = GUIAS[n].map((g, i) => `<button class="guia${est.usadas.includes(i) ? ' used' : ''}" type="button" data-act="guia" data-i="${i}" ${pyListo ? '' : 'disabled'}><span>${String(i + 1).padStart(2, '0')}</span>${g[0]}</button>`).join('');
+  if (s) {
+    $('#out').innerHTML = ''; $('#out').appendChild(s.out); $('#code').value = s.code;
+  } else {
+    $('#code').value = `# Escribe tu propio análisis. La última línea se muestra como tabla.\n${caso.datos[0].nombre}.head()`;
+    $('#out').innerHTML = `<div class="card empty">${mensajeVacio()}</div>`;
+  }
+  $('#runBtn').disabled = !pyListo;
+  renderHip(); renderDictamen(); actualizarConsultas();
+  mostrar('caso');
+  // Un intento nuevo o un caso distinto parten con los datos limpios; al continuar se conservan tus variables
+  if (pyListo) { if (nuevo || cargado !== n) cargarDatos(); else pintarFormas(); }
+}
+
+function actualizarConsultas() {
+  const b = $('#cCons'); b.textContent = est.consultas; b.classList.toggle('over', est.consultas > caso.par);
+  $('#cPar').textContent = `par ${caso.par}`;
+}
+
+function renderHip() {
+  const por = CATS.map(cat => [cat, caso.hip.map((h, i) => [h, i]).filter(([h]) => h.cat === cat)]).filter(([, l]) => l.length);
+  $('#cHip').innerHTML = por.map(([cat, lista]) => `<div class="ishi-cat"><h4>${cat}</h4>${lista.map(([h, i]) => `
+    <div class="hip"><p>${h.txt}</p><div class="tri" role="group" aria-label="Evaluar hipótesis">
+      <button type="button" data-act="hip" data-i="${i}" data-v="" title="Sin evaluar" aria-label="Sin evaluar">?</button>
+      <button type="button" data-act="hip" data-i="${i}" data-v="si">Confirmada</button>
+      <button type="button" data-act="hip" data-i="${i}" data-v="no">Descartada</button></div></div>`).join('')}</div>`).join('');
+  syncHip();
+}
+
+function syncHip() {
+  document.querySelectorAll('[data-act="hip"]').forEach(b => {
+    const on = (est.hip[b.dataset.i] || '') === b.dataset.v;
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.disabled = est.entregado;
+  });
+  const n = Object.values(est.hip).filter(Boolean).length;
+  $('#hipCount').textContent = `${n}/${caso.hip.length} evaluadas`;
+  dibujarPez();
+}
+
+// Espina de pescado: una espina por categoría, con un punto por hipótesis según su estado
+function dibujarPez() {
+  const cats = CATS, w = 360, h = 120, mid = 60, x0 = 14, x1 = 300;
+  let s = `<line class="spine" x1="${x0}" y1="${mid}" x2="${x1}" y2="${mid}"/><path class="head" d="M${x1} ${mid - 16} L${x1 + 40} ${mid} L${x1} ${mid + 16} Z"/>`;
+  cats.forEach((cat, k) => {
+    const col = k % 3, top = k < 3, bx = 70 + col * 85, ty = top ? 14 : h - 14;
+    s += `<line class="bone" x1="${bx - 34}" y1="${ty}" x2="${bx}" y2="${mid}"/>`;
+    s += `<text x="${bx - 36}" y="${top ? ty - 4 : ty + 10}">${cat.toUpperCase()}</text>`;
+    caso.hip.map((hh, i) => [hh, i]).filter(([hh]) => hh.cat === cat).forEach(([, i], j) => {
+      const t = 0.3 + j * 0.22, px = bx - 34 + 34 * t, py = ty + (mid - ty) * t;
+      s += `<circle class="dot-${est.hip[i] || ''}" cx="${px}" cy="${py}" r="4.5"/>`;
+    });
+  });
+  $('#fish').innerHTML = s;
+}
+
+function renderDictamen() {
+  const opts = (lista, name, sel) => lista.map((o, i) => `<label class="opt"><input type="radio" name="${name}" value="${i}" ${sel === i ? 'checked' : ''}><span>${o.txt}</span></label>`).join('');
+  $('#cCausas').innerHTML = opts(caso.causas, 'causa', est.causa);
+  $('#cAcc').innerHTML = opts(caso.acciones, 'accion', est.accion);
+  syncSubmit();
+}
+function syncSubmit() {
+  document.querySelectorAll('.dict input').forEach(i => { i.disabled = est.entregado; });
+  if (est.entregado) {
+    $('#submitBtn').disabled = false; $('#submitBtn').textContent = 'Ver informe';
+    $('#submitHint').textContent = 'Informe entregado. Para mejorar tu puntaje, usa «Reintentar este caso».';
+    return;
+  }
+  $('#submitBtn').textContent = 'Entregar informe';
+  const ok = est.causa != null && est.accion != null;
+  $('#submitBtn').disabled = !ok;
+  const pend = caso.hip.length - Object.values(est.hip).filter(Boolean).length;
+  $('#submitHint').textContent = !ok ? 'Elige una causa raíz y una acción para entregar.'
+    : pend ? `Te faltan ${pend} hipótesis por evaluar: sin evaluar no suman puntos.` : 'Listo para entregar.';
+}
+
+/* =========================================================
+   5. Resultado
+   ========================================================= */
+function entregar() {
+  // Un informe entregado no se puede volver a entregar: solo se vuelve a mostrar
+  if (est.entregado) { $('#resBody').innerHTML = est.informe; $('#dRes').showModal(); $('#dRes').scrollTop = 0; return; }
+  const nH = caso.hip.length;
+  let hipOk = 0;
+  caso.hip.forEach((h, i) => { const r = est.hip[i]; if (r && (r === 'si') === h.v) hipOk++; });
+  const pCausa = caso.causas[est.causa].ok ? 40 : 0;
+  const pAcc = caso.acciones[est.accion].ok ? 20 : 0;
+  const pHip = Math.round(hipOk / nH * 30);
+  const pEf = est.consultas < 2 ? 0 : Math.max(0, 10 - 2 * Math.max(0, est.consultas - caso.par));
+  const total = pCausa + pAcc + pHip + pEf;
+  guardarMejor(caso.n, total);
+
+  const causaOk = caso.causas.find(c => c.ok), accOk = caso.acciones.find(a => a.ok);
+  const sig = CASOS.find(c => c.n === caso.n + 1);
+  $('#resBody').innerHTML = `
+    <span class="eyebrow">Informe de causa raíz · ${caso.nivel}</span>
+    <h2>${total >= 90 ? 'Causa raíz encontrada' : total >= 70 ? 'Buen análisis' : total >= 50 ? 'Vas bien, pero faltó evidencia' : 'El problema volverá a ocurrir'}</h2>
+    <div class="score"><b>${total}</b><span>${estrellas(total)}</span></div>
+    <div class="parts">
+      <div><b>${pCausa}/40</b><small>causa raíz</small></div>
+      <div><b>${pAcc}/20</b><small>acción correctiva</small></div>
+      <div><b>${pHip}/30</b><small>${hipOk} de ${nH} hipótesis</small></div>
+      <div><b>${pEf}/10</b><small>${est.consultas} consultas · par ${caso.par}</small></div>
+    </div>
+    <h3>Dictamen</h3>
+    <ul class="verdict">
+      <li class="${pCausa ? 'good' : 'bad'}"><span class="tagv">${pCausa ? '✓ Causa raíz correcta' : '✗ Causa raíz incorrecta'}</span><span class="why">${pCausa ? causaOk.txt : `Elegiste: ${caso.causas[est.causa].txt}. La causa raíz es: <b>${causaOk.txt}</b>.`}</span></li>
+      <li class="${pAcc ? 'good' : 'bad'}"><span class="tagv">${pAcc ? '✓ Acción correctiva correcta' : '✗ Acción incorrecta'}</span><span class="why">${pAcc ? accOk.txt : `Elegiste: ${caso.acciones[est.accion].txt}. Lo que corresponde es: <b>${accOk.txt}</b>.`}</span></li>
+    </ul>
+    <h3>Hipótesis del Ishikawa</h3>
+    <ul class="verdict">${caso.hip.map((h, i) => {
+      const r = est.hip[i], bien = r && (r === 'si') === h.v;
+      const cls = !r ? 'skip' : bien ? 'good' : 'bad';
+      const lab = !r ? 'Sin evaluar' : bien ? '✓ Acertaste' : '✗ Fallaste';
+      return `<li class="${cls}"><span class="tagv">${lab} · era ${h.v ? 'confirmada' : 'descartada'} · ${h.cat}</span><br>${h.txt}<span class="why">${h.por}</span></li>`;
+    }).join('')}</ul>
+    <h3>Los 5 porqués</h3>
+    <ol class="whys">${caso.porques.map(p => `<li><span>${p}</span></li>`).join('')}</ol>
+    <h3>La trampa del caso</h3>
+    <div class="trap">${caso.trampa}</div>
+    <div class="btns">
+      ${sig ? `<button class="btn primary" type="button" data-act="open" data-n="${sig.n}">Siguiente caso: ${sig.titulo} →</button>` : `<button class="btn primary" type="button" data-act="home">Volver a los casos</button>`}
+      <button class="btn" type="button" data-act="retry">Reintentar este caso</button>
+      <button class="btn ghost" type="button" data-act="close">Seguir revisando los datos</button>
+    </div>`;
+  est.entregado = true; est.informe = $('#resBody').innerHTML;
+  syncHip(); syncSubmit();
+  $('#dRes').showModal();
+  $('#dRes').scrollTop = 0;
+}
+
+/* =========================================================
+   6. Eventos
+   ========================================================= */
+let toastT = 0;
+function toast(msg) {
+  let t = document.querySelector('.toast');
+  if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 2600);
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  switch (a) {
+    case 'open': $('#dRes').open && $('#dRes').close(); abrirCaso(+b.dataset.n); break;
+    case 'home': $('#dRes').open && $('#dRes').close(); salirDelCaso(); renderHome(); mostrar('home'); break;
+    case 'retry': $('#dRes').close(); abrirCaso(caso.n, true); break;
+    case 'close': $('#dRes').close(); break;
+    case 'guia': {
+      const i = +b.dataset.i, g = GUIAS[caso.n][i];
+      $('#code').value = g[1]; b.classList.add('used');
+      if (!est.usadas.includes(i)) est.usadas.push(i);
+      ejecutar(g[1], g[0], true); break;
+    }
+    case 'run': ejecutar($('#code').value, 'Tu código'); break;
+    case 'clear': $('#out').innerHTML = '<div class="card empty">Resultados limpios. Las consultas ya hechas se mantienen.</div>'; break;
+    case 'hip': if (!est.entregado) { est.hip[b.dataset.i] = b.dataset.v; syncHip(); syncSubmit(); } break;
+    case 'submit': entregar(); break;
+    case 'gloss':
+      if ($('#vHome').hidden) { salirDelCaso(); renderHome(); mostrar('home'); }
+      $('#glosario').scrollIntoView({ behavior: 'smooth' }); break;
+    case 'theme': {
+      const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('theme', next); } catch (err) {}
+      redibujarTodo(); break;
+    }
+  }
+});
+document.addEventListener('change', e => {
+  if (est && est.entregado) return;
+  if (e.target.name === 'causa') est.causa = +e.target.value;
+  if (e.target.name === 'accion') est.accion = +e.target.value;
+  if (e.target.name === 'causa' || e.target.name === 'accion') syncSubmit();
+});
+// Tab indenta dentro del editor; tras Esc, Tab vuelve a mover el foco (accesibilidad con teclado)
+let tabLibre = false;
+$('#code').addEventListener('keydown', e => {
+  if (e.key === 'Escape') { tabLibre = true; return; }
+  if (e.key !== 'Tab') tabLibre = false;
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); ejecutar($('#code').value, 'Tu código'); }
+  else if (e.key === 'Tab' && !e.shiftKey && !tabLibre) {
+    e.preventDefault();
+    const t = e.target, s = t.selectionStart;
+    t.setRangeText('    ', s, t.selectionEnd, 'end');
+  }
+});
+function redibujarTodo() { readColors(); document.querySelectorAll('figure.chart').forEach(dibujar); }
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redibujarTodo);
+let rz = 0;
+window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(redibujarTodo, 150); });
+
+readColors();
+renderHome();
+iniciarPython();
+</script>
+</body>
+</html>
