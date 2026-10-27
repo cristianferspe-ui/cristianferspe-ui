@@ -326,6 +326,8 @@ h3 { font: 600 19px/1.3 var(--sans); margin: 0; letter-spacing: -.01em; }
 .feature { display: grid; grid-template-columns: minmax(0, 1fr); border: 1px solid var(--line); background: var(--surface); }
 .feature-img { display: block; border-bottom: 1px solid var(--line); overflow: hidden; background: #232a33; }
 .feature-img img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: 28% 18%; transition: transform .8s var(--ease); }
+.feature-img.top img { object-position: 50% 0; }
+.feature + .feature { margin-top: 16px; }
 .feature:hover .feature-img img { transform: scale(1.035); }
 .feature-body { padding: 24px; }
 .feature-body h3 { font-size: clamp(20px, 2.2vw, 24px); }

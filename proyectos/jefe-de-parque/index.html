@@ -1,0 +1,1133 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jefe de Parque · Simulador de mantenimiento predictivo</title>
+<meta name="description" content="Simulador interactivo de mantenimiento predictivo en un parque eólico: detecta tendencias SCADA, programa preventivos y mejora MTBF, MTTR y disponibilidad.">
+<link rel="canonical" href="https://cristianferspe-ui.github.io/cristianferspe-ui/proyectos/jefe-de-parque/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Jefe de Parque · Simulador de mantenimiento predictivo">
+<meta property="og:description" content="Opera un parque eólico de 12 turbinas por un año: lee tendencias SCADA, anticipa fallas y compara tu MTBF, MTTR y costos contra la estrategia reactiva.">
+<meta property="og:url" content="https://cristianferspe-ui.github.io/cristianferspe-ui/proyectos/jefe-de-parque/">
+<meta property="og:image" content="https://cristianferspe-ui.github.io/cristianferspe-ui/proyectos/jefe-de-parque/og.png">
+<meta property="og:locale" content="es_CL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0f7487">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230f7487'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' fill='white' text-anchor='middle'>CS</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<script>
+  // Aplica el tema guardado del portafolio antes de pintar
+  try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<style>
+/* ---------- Tokens (mismos del portafolio) ---------- */
+:root {
+  --bg: #f3f5f4; --surface: #ffffff; --surface-2: #eef2f1;
+  --ink: #0c1a1f; --muted: #56676f; --line: #cdd6d9;
+  --grid: rgba(15, 116, 135, .07);
+  --accent: #0f7487; --accent-ink: #ffffff;
+  --ok: #1d7a4a; --warn: #a86a0c; --bad: #c0392b;
+  --sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1114; --surface: #0f191d; --surface-2: #14232a; --ink: #e4eef1; --muted: #8fa2aa;
+    --line: #22353c; --grid: rgba(60, 182, 203, .06);
+    --accent: #3cb6cb; --accent-ink: #04161a; --ok: #5fcf93; --warn: #e8a93a; --bad: #ff6f61;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1114; --surface: #0f191d; --surface-2: #14232a; --ink: #e4eef1; --muted: #8fa2aa;
+  --line: #22353c; --grid: rgba(60, 182, 203, .06);
+  --accent: #3cb6cb; --accent-ink: #04161a; --ok: #5fcf93; --warn: #e8a93a; --bad: #ff6f61;
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; color: var(--ink); font: 400 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased;
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  overflow-x: clip;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 0 16px; }
+.mono { font-family: var(--mono); }
+.card { background: var(--surface); border: 1px solid var(--line); }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- Barra superior ---------- */
+.top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.top-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding-block: 10px; }
+.brand { display: flex; align-items: baseline; gap: 12px; margin-right: auto; min-width: 0; }
+.brand a { font: 500 12px var(--mono); color: var(--muted); text-decoration: none; white-space: nowrap; }
+.brand a:hover { color: var(--accent); }
+.brand h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+.brand h1 span { color: var(--accent); }
+.clock { font: 500 13px var(--mono); white-space: nowrap; }
+.clock b { font-size: 16px; }
+.clock .bar { display: block; height: 3px; background: var(--line); margin-top: 4px; }
+.clock .bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--line); background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 10px; font: 500 12px var(--mono); border-right: 1px solid var(--line); min-width: 40px; }
+.seg button:last-child { border-right: 0; }
+.seg button.on { background: var(--accent); color: var(--accent-ink); }
+.tools { display: flex; align-items: center; gap: 8px; }
+.chk { display: inline-flex; align-items: center; gap: 6px; font: 500 12px var(--mono); color: var(--muted); white-space: nowrap; }
+.icon-btn { border: 1px solid var(--line); background: var(--surface); height: 32px; min-width: 32px; padding: 0 10px; font: 500 12px var(--mono); }
+.icon-btn:hover { border-color: var(--accent); }
+
+/* ---------- KPIs ---------- */
+.kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; margin: 16px 0; }
+.kpi { padding: 12px 14px; border-right: 1px solid var(--line); min-width: 0; }
+.kpi:last-child { border-right: 0; }
+.kpi b { display: block; font: 600 22px/1.15 var(--mono); margin: 6px 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi small { display: block; font: 400 11px/1.3 var(--mono); color: var(--muted); }
+@media (max-width: 980px) {
+  .kpis { grid-template-columns: repeat(3, 1fr); }
+  .kpi:nth-child(3) { border-right: 0; }
+  .kpi:nth-child(-n+3) { border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 520px) {
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .kpi { border-right: 1px solid var(--line) !important; border-bottom: 1px solid var(--line); }
+  .kpi:nth-child(2n) { border-right: 0 !important; }
+  .kpi:nth-last-child(-n+2) { border-bottom: 0; }
+  .kpi b { font-size: 19px; }
+}
+
+/* ---------- Layout principal ---------- */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 16px; align-items: start; }
+@media (max-width: 1060px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.sec-h h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.sec-h .mono { font-size: 12px; color: var(--muted); }
+
+/* ---------- Turbinas ---------- */
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 14px; }
+@media (max-width: 720px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 10px; } }
+.tile {
+  position: relative; display: flex; flex-direction: column; align-items: stretch; text-align: left;
+  background: var(--surface-2); border: 1px solid var(--line); padding: 8px 8px 6px; min-width: 0;
+  border-top: 3px solid var(--st, var(--accent)); transition: border-color .15s;
+}
+.tile:hover { border-color: var(--accent); border-top-color: var(--st, var(--accent)); }
+.tile.sel { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tile-id { font: 600 12px var(--mono); }
+.tile-badge { position: absolute; top: 6px; right: 6px; font: 700 11px var(--mono); color: var(--warn); }
+.tile svg { width: 100%; height: 64px; margin: 2px 0; }
+.tile .tower { fill: var(--muted); opacity: .55; }
+.tile .nac { fill: var(--ink); opacity: .75; }
+.tile .rotor path { fill: var(--ink); opacity: .82; }
+.tile .hub { fill: var(--st, var(--accent)); }
+.tile-row { display: flex; justify-content: space-between; gap: 4px; font: 500 11px var(--mono); }
+.tile-p { color: var(--ink); white-space: nowrap; }
+.tile-st { color: var(--st, var(--muted)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile canvas { display: block; width: 100%; height: 38px; margin-top: 5px; }
+.s-run { --st: var(--ok); }
+.s-idle { --st: var(--muted); }
+.s-fail { --st: var(--bad); }
+.s-maint { --st: var(--warn); }
+.s-fail .tile-st, .s-maint .tile-st { font-weight: 600; }
+
+/* ---------- Viento y cuadrillas ---------- */
+.ops { display: grid; grid-template-columns: 1.3fr 1fr; border-top: 1px solid var(--line); }
+@media (max-width: 720px) { .ops { grid-template-columns: 1fr; } }
+.ops > div { padding: 12px 14px; min-width: 0; }
+.ops > div + div { border-left: 1px solid var(--line); }
+@media (max-width: 720px) { .ops > div + div { border-left: 0; border-top: 1px solid var(--line); } }
+.ops-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.ops-h b { font: 600 18px var(--mono); }
+.flags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.flag { font: 500 11px var(--mono); padding: 2px 7px; border: 1px solid currentColor; }
+.flag.ok { color: var(--ok); } .flag.no { color: var(--bad); }
+#wChart { display: block; width: 100%; height: 90px; }
+.crew { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.crew li { font: 400 12px/1.35 var(--mono); }
+.crew li b { font-weight: 600; }
+.crew .muted { color: var(--muted); }
+.prog { display: block; height: 4px; background: var(--line); margin-top: 4px; }
+.prog i { display: block; height: 100%; background: var(--accent); }
+.qinfo { margin-top: 10px; font: 400 11px var(--mono); color: var(--muted); }
+
+/* ---------- Panel de detalle ---------- */
+.panel { position: sticky; top: 74px; max-height: calc(100vh - 90px); overflow: auto; }
+@media (max-width: 1060px) { .panel { position: static; max-height: none; } }
+.p-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px; border-bottom: 1px solid var(--line); }
+.p-head h2 { margin: 4px 0 0; font: 700 22px var(--mono); }
+.pill { font: 600 11px var(--mono); padding: 3px 8px; border: 1px solid var(--st, var(--line)); color: var(--st, var(--muted)); text-transform: uppercase; letter-spacing: .05em; }
+.meta { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; border-bottom: 1px solid var(--line); }
+.meta div { padding: 8px 10px; border-right: 1px solid var(--line); min-width: 0; }
+.meta div:last-child { border-right: 0; }
+.meta dt { font: 400 10px var(--mono); color: var(--muted); text-transform: uppercase; }
+.meta dd { margin: 2px 0 0; font: 600 13px var(--mono); white-space: nowrap; }
+.ptasks { padding: 0 14px; }
+.ptask { padding: 8px 0; border-bottom: 1px dashed var(--line); font: 400 12px/1.4 var(--mono); }
+.ptask b { font-weight: 600; }
+.comp { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.comp-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.comp-h b { font-size: 14px; }
+.comp-h small { display: block; font: 400 11px var(--mono); color: var(--muted); }
+.comp-h output { font: 600 16px var(--mono); white-space: nowrap; }
+.comp-h output.w { color: var(--warn); } .comp-h output.a { color: var(--bad); }
+.comp canvas { display: block; width: 100%; height: 92px; margin: 6px 0 8px; }
+.act { width: 100%; border: 1px solid var(--accent); background: none; color: var(--accent); padding: 7px 10px; font: 500 12px var(--mono); text-align: left; display: flex; justify-content: space-between; gap: 8px; }
+.act:hover:not(:disabled) { background: var(--accent); color: var(--accent-ink); }
+.act.danger { border-color: var(--bad); color: var(--bad); }
+.act.danger:hover { background: var(--bad); color: #fff; }
+.act:disabled { border-color: var(--line); color: var(--muted); }
+.act.danger.pulse { animation: pulse 1.2s infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--bad) 25%, transparent); } }
+.p-foot { padding: 12px 14px; display: grid; gap: 10px; }
+.insp { font: 400 12px/1.45 var(--mono); }
+.insp ul { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.insp li::before { content: "■ "; color: var(--c, var(--muted)); }
+.insp .ok { --c: var(--ok); } .insp .watch { --c: var(--accent); } .insp .warn { --c: var(--warn); } .insp .bad { --c: var(--bad); }
+
+/* ---------- Bitácora ---------- */
+.log-wrap { margin: 16px 0 32px; }
+#log { list-style: none; margin: 0; padding: 0 14px; max-height: 260px; overflow: auto; }
+#log li { display: grid; grid-template-columns: 82px 1fr; gap: 10px; padding: 6px 0; border-bottom: 1px dashed var(--line); font: 400 12px/1.4 var(--mono); }
+#log time { color: var(--muted); }
+#log .e-fail span { color: var(--bad); font-weight: 600; }
+#log .e-warn span { color: var(--warn); }
+#log .e-ok span { color: var(--ok); }
+.foot { font: 400 11px var(--mono); color: var(--muted); padding-bottom: 24px; }
+
+/* ---------- Glosario ---------- */
+.gloss { margin: 0 0 16px; scroll-margin-top: 80px; }
+.gloss-intro { padding: 12px 14px 0; margin: 0; font-size: 14px; color: var(--muted); }
+.gloss-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 860px) { .gloss-grid { grid-template-columns: minmax(0, 1fr); } }
+.gloss-grid > div { padding: 14px; border-top: 1px solid var(--line); min-width: 0; }
+.gloss-grid > div:nth-child(odd) { border-right: 1px solid var(--line); }
+@media (max-width: 860px) { .gloss-grid > div:nth-child(odd) { border-right: 0; } }
+.gloss h3 { margin: 0 0 8px; font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.gloss dl { margin: 0; }
+.gloss dt { font-weight: 600; font-size: 14px; margin-top: 10px; }
+.gloss dt:first-child { margin-top: 0; }
+.gloss dd { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.gloss dd b { color: var(--ink); font-weight: 600; }
+.gloss code { font: 500 12px var(--mono); color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); padding: 1px 5px; white-space: normal; }
+.gtable-wrap { overflow-x: auto; border-top: 1px solid var(--line); }
+.gtable { width: 100%; min-width: 640px; border-collapse: collapse; font: 400 12px/1.4 var(--mono); }
+.gtable th, .gtable td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.gtable thead th { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 500; }
+.gtable tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- Avisos ---------- */
+.toasts { position: fixed; right: 16px; bottom: 16px; z-index: 40; display: grid; gap: 8px; width: min(360px, calc(100vw - 32px)); }
+.toast { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--c, var(--accent)); padding: 10px 12px; font: 400 12px/1.4 var(--mono); box-shadow: 0 8px 24px rgba(0,0,0,.14); }
+.toast.bad { --c: var(--bad); } .toast.warn { --c: var(--warn); }
+.toast .row { display: flex; gap: 8px; margin-top: 8px; }
+.toast .row button { border: 1px solid var(--line); background: var(--surface-2); padding: 4px 8px; font: 500 11px var(--mono); }
+.toast .row button.go { background: var(--bad); color: #fff; border-color: var(--bad); }
+
+/* ---------- Diálogos ---------- */
+dialog { border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 0; width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
+dialog::backdrop { background: rgba(5, 14, 17, .6); }
+.dlg { padding: 22px; }
+.dlg h2 { margin: 6px 0 12px; font-size: 24px; letter-spacing: -.01em; }
+.dlg p, .dlg li { font-size: 14px; }
+.dlg ul { padding-left: 18px; }
+.dlg li { margin: 4px 0; }
+.formula { font: 500 13px var(--mono); background: var(--surface-2); border: 1px solid var(--line); padding: 10px 12px; margin: 12px 0; line-height: 1.7; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.btn { border: 1px solid var(--accent); background: none; color: var(--accent); padding: 9px 16px; font: 600 13px var(--mono); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.rank { font: 600 13px var(--mono); color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+.cmp { width: 100%; border-collapse: collapse; font: 400 13px var(--mono); margin: 12px 0; }
+.cmp th, .cmp td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.cmp th:first-child, .cmp td:first-child { text-align: left; }
+.cmp thead th { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 500; }
+.cmp td.win { color: var(--ok); font-weight: 600; }
+.big { font: 700 28px var(--mono); }
+.big.pos { color: var(--ok); } .big.neg { color: var(--bad); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand">
+      <a href="../../#proyectos">← Portafolio</a>
+      <h1>Jefe de Parque<span>.</span></h1>
+    </div>
+    <div class="clock" aria-live="off">Día <b id="day">1</b>/365 · <span id="hour">00:00</span><span class="bar"><i id="yearBar"></i></span></div>
+    <div class="seg" role="group" aria-label="Velocidad de simulación">
+      <button type="button" data-act="pause" aria-label="Pausa">❚❚</button>
+      <button type="button" data-act="speed" data-s="1" title="8 horas por segundo">▶</button>
+      <button type="button" data-act="speed" data-s="2" title="1 día por segundo">▶▶</button>
+      <button type="button" data-act="speed" data-s="3" title="3 días por segundo">▶▶▶</button>
+    </div>
+    <div class="tools">
+      <label class="chk"><input type="checkbox" id="autoPause" checked> Pausa en falla</label>
+      <button class="icon-btn" type="button" data-act="help">Cómo jugar</button>
+      <button class="icon-btn" type="button" data-act="gloss">Glosario</button>
+      <button class="icon-btn" type="button" data-act="theme" aria-label="Cambiar tema claro u oscuro">◐</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="kpis card" aria-label="Indicadores del parque">
+    <div class="kpi"><span class="eyebrow">Disponibilidad</span><b id="kAv">100%</b><small>horas disponibles / horas totales</small></div>
+    <div class="kpi"><span class="eyebrow">MTBF</span><b id="kMtbf">—</b><small id="kMtbfS">horas en servicio / fallas</small></div>
+    <div class="kpi"><span class="eyebrow">MTTR</span><b id="kMttr">—</b><small>horas de reparación / fallas</small></div>
+    <div class="kpi"><span class="eyebrow">Fallas</span><b id="kFail">0</b><small id="kFailS">0 preventivos a tiempo</small></div>
+    <div class="kpi"><span class="eyebrow">Energía</span><b id="kEn">0 MWh</b><small id="kEnS">0 MWh no generados</small></div>
+    <div class="kpi"><span class="eyebrow">Costo mantenimiento</span><b id="kCost">US$0</b><small id="kCostS">+ US$0 energía perdida</small></div>
+  </section>
+
+  <div class="layout">
+    <section class="card" aria-label="Parque eólico">
+      <div class="sec-h"><h2>Parque · 12 × 2,3 MW</h2><span class="mono" id="parkP">0,0 MW</span></div>
+      <div class="grid" id="grid"></div>
+      <div class="ops">
+        <div>
+          <div class="ops-h"><span class="eyebrow">Viento</span><b id="wNow">0 m/s</b></div>
+          <div class="flags"><span class="flag ok" id="fClimb">Altura OK</span><span class="flag ok" id="fCrane">Grúa OK</span></div>
+          <canvas id="wChart" aria-label="Viento últimas 24 horas y pronóstico 72 horas"></canvas>
+          <div class="qinfo">últimas 24 h · pronóstico 72 h · límites 10 m/s (grúa) y 12 m/s (altura)</div>
+        </div>
+        <div>
+          <div class="ops-h"><span class="eyebrow">Cuadrillas</span><span class="mono" style="font-size:12px" id="crewSum"></span></div>
+          <ul class="crew" id="crews"></ul>
+          <div class="qinfo" id="qInfo"></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="card panel" id="panel" aria-label="Detalle de turbina"></aside>
+  </div>
+
+  <section class="card log-wrap" aria-label="Bitácora">
+    <div class="sec-h"><h2>Bitácora de operación</h2><span class="mono" id="seedLbl"></span></div>
+    <ol id="log"></ol>
+  </section>
+  <section class="card gloss" id="glosario" aria-labelledby="gTitle">
+    <div class="sec-h"><h2 id="gTitle">Glosario · términos y cálculos</h2><span class="mono">cómo funciona el simulador</span></div>
+    <p class="gloss-intro">Cada hora simulada el juego calcula viento, potencia, desgaste y señales de las 12 turbinas. Estas son las definiciones y fórmulas que usa.</p>
+    <div class="gloss-grid">
+      <div>
+        <h3>Indicadores</h3>
+        <dl>
+          <dt>Disponibilidad</dt>
+          <dd>Porcentaje del tiempo en que las turbinas estaban en condiciones de generar. <code>horas disponibles ÷ (12 turbinas × horas transcurridas)</code>. Una turbina detenida por falta de viento cuenta como disponible; una detenida por falla, inspección o mantención, no.</dd>
+          <dt>MTBF · tiempo medio entre fallas</dt>
+          <dd>Mide la <b>confiabilidad</b>: cuánto opera una turbina, en promedio, antes de fallar. <code>horas en servicio del parque ÷ n.º de fallas</code>. Ejemplo: 105.000 h en servicio con 15 fallas dan 7.000 h (~292 días). <b>Más alto es mejor.</b></dd>
+          <dt>MTTR · tiempo medio para reparar</dt>
+          <dd>Mide la <b>mantenibilidad</b> y la velocidad de respuesta. <code>Σ (vuelta a servicio − momento de la falla) ÷ n.º de fallas</code>. Incluye tu tiempo de reacción, la espera de repuestos o grúa, la espera por viento y la reparación. Las fallas sin reparar cuentan hasta el momento actual. <b>Más bajo es mejor.</b></dd>
+          <dt>Relación entre ellos</dt>
+          <dd><code>Disponibilidad ≈ MTBF ÷ (MTBF + MTTR)</code>. Es la disponibilidad <i>inherente</i>, que solo considera fallas; la del juego también descuenta preventivos e inspecciones.</dd>
+          <dt>Energía generada y no generada</dt>
+          <dd>Cada hora: <code>MW × 1 h = MWh</code>. La energía no generada es la que la turbina habría producido con el viento de esa hora si hubiera estado disponible, valorizada a <b>US$65/MWh</b>.</dd>
+          <dt>Costos y resultado final</dt>
+          <dd><code>Costo total = mantenimiento + correctivos pendientes + energía no generada × US$65</code>. El ahorro es <code>costo total reactivo − tu costo total</code>, también expresado como % del reactivo.</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>Señales y condición</h3>
+        <dl>
+          <dt>SCADA</dt>
+          <dd>Sistema de supervisión y adquisición de datos de cada turbina. Aquí registra una lectura por hora de cuatro señales: vibración, dos temperaturas y desviación de pitch.</dd>
+          <dt>Intervalo P-F</dt>
+          <dd>Tiempo entre el punto <b>P</b> (la falla potencial ya es detectable) y el punto <b>F</b> (falla funcional). Dentro de ese intervalo la señal se aleja de lo normal: <code>desvío = (alarma − base) × d²</code>, con <code>d = 1 − vida restante ÷ P-F</code>. Avanza despacio al principio y se acelera al final.</dd>
+          <dt>Valor base, carga y ruido</dt>
+          <dd><code>señal = base + k × (potencia ÷ 2,3 MW) + desvío + ruido</code>. Con más carga sube la temperatura y la vibración, así que un día ventoso puede parecer una falla. Hay transitorios aislados que no significan nada.</dd>
+          <dt>Media móvil 24 h</dt>
+          <dd>Línea gruesa de cada gráfica: el promedio de las últimas 24 lecturas. Filtra el ruido y deja ver la tendencia. Las mini-gráficas de las tarjetas muestran el promedio diario de 30 días, escalado entre el valor base (abajo) y la alarma (arriba).</dd>
+          <dt>Advertencia y alarma</dt>
+          <dd>La <b>advertencia SCADA</b> se activa cuando el promedio exponencial de ~8 h supera el umbral. Está cerca de la alarma, igual que en terreno, así que suele llegar tarde. La <b>alarma</b> corresponde al nivel de falla.</dd>
+          <dt>Desgaste y vida útil</dt>
+          <dd>Por cada hora operando, el desgaste es <code>0,35 + 0,65 × carga</code>; en ralentí es 0,1 y detenida, 0. La vida de cada componente es aleatoria (distribución Weibull) y se renueva al repararlo.</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>Mantenimiento</h3>
+        <dl>
+          <dt>Inspección</dt>
+          <dd>6 h y US$3k, con la turbina detenida. Detecta daño hasta 2 veces el intervalo P-F antes de la falla y entrega una estimación de vida restante con ±20% de error. El convertidor no se puede inspeccionar en terreno.</dd>
+          <dt>Preventivo</dt>
+          <dd>Reemplazo planificado antes de la falla. Tiene una etapa de <b>logística</b> (repuestos y grúa), en la que la turbina sigue generando, y una de <b>trabajo</b>, con la turbina detenida. Si la falla llega antes, se cancela y queda como <i>llegó tarde</i>.</dd>
+          <dt>Correctivo</dt>
+          <dd>Reparación después de la falla. Cuesta cerca de 2,5 veces más y demora mucho más por los daños secundarios y la logística no planificada. La turbina queda detenida desde la falla.</dd>
+          <dt>Preventivo a tiempo / prematuro</dt>
+          <dd>Es <b>a tiempo</b> si al ordenarlo faltaba menos de 2× P-F para la falla. Es <b>prematuro</b> si el componente estaba sano: lo pagaste sin necesidad.</dd>
+          <dt>Cuadrillas y viento</dt>
+          <dd>Hay 2 cuadrillas y los correctivos tienen prioridad en la cola. No se sube a la góndola con viento ≥ 12 m/s, y la grúa (multiplicadora y generador) no opera con ≥ 10 m/s. Un trabajo ya iniciado y detenido por viento mantiene la turbina parada.</dd>
+          <dt>Curva de potencia</dt>
+          <dd>Arranque a 3 m/s, potencia nominal de 2,3 MW desde 12,5 m/s y corte a 25 m/s. Entre 3 y 12,5 m/s crece con el cubo de la velocidad del viento.</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>Comparación y rangos</h3>
+        <dl>
+          <dt>Estrategia reactiva</dt>
+          <dd>Se simula el mismo parque, con la misma semilla, el mismo viento y las mismas vidas iniciales. Sin inspecciones ni preventivos: despacha el correctivo apenas ocurre la falla.</dd>
+          <dt>Rangos según el ahorro</dt>
+          <dd><b>≥ 50%</b> Referente en confiabilidad · <b>≥ 35%</b> Jefe de Parque · <b>≥ 20%</b> Supervisor de mantenimiento · <b>≥ 5%</b> Técnico reactivo · <b>&lt; 5%</b> Apagaincendios. Como referencia, reaccionar solo a las advertencias SCADA ahorra ~33%; leer tendencias, ~55%.</dd>
+          <dt>Parque #</dt>
+          <dd>Número de semilla: el mismo número genera el mismo viento y las mismas vidas de componentes, así que puedes repetir un parque y mejorar tu resultado.</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="gtable-wrap">
+      <table class="gtable">
+        <thead><tr><th>Componente</th><th>Señal</th><th>Adv. / alarma</th><th>Intervalo P-F aprox.</th><th>Preventivo</th><th>Correctivo</th></tr></thead>
+        <tbody id="gComps"></tbody>
+      </table>
+    </div>
+  </section>
+  <p class="foot">Simulación con fines educativos: modelo de degradación con intervalo P-F, curva de potencia genérica de 2,3 MW y costos referenciales. Diseñado por Cristianfer Silva Portillo.</p>
+</main>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<dialog id="dIntro">
+  <div class="dlg">
+    <span class="eyebrow">Simulador de mantenimiento predictivo</span>
+    <h2>Eres el jefe de un parque eólico</h2>
+    <p>Tienes <b>12 aerogeneradores de 2,3 MW</b> y <b>2 cuadrillas</b> por un año. Cada turbina tiene cuatro componentes monitoreados por SCADA: multiplicadora, generador, pitch y convertidor.</p>
+    <ul>
+      <li><b>Antes de fallar, la señal se desvía</b> (intervalo P-F). La multiplicadora avisa con semanas; el convertidor, con horas.</li>
+      <li><b>Haz clic en una turbina</b> para ver sus tendencias de 30 días. Las mini-gráficas de cada tarjeta muestran el promedio diario de las 4 señales.</li>
+      <li><b>Inspecciona</b> si tienes dudas, y programa un <b>preventivo</b> antes de la falla: cuesta menos de la mitad y demora mucho menos que un correctivo, pero la grúa y los repuestos se planifican con días de anticipación.</li>
+      <li>Si algo falla, <b>envía el correctivo</b> rápido: el tiempo de reacción también suma al MTTR.</li>
+      <li>Con viento sobre <b>12 m/s</b> no se sube a la góndola; sobre <b>10 m/s</b> no opera la grúa.</li>
+      <li>Si cambias un componente sano, lo pagas igual: eso es una intervención prematura.</li>
+    </ul>
+    <div class="formula">MTBF = horas en servicio ÷ n.º de fallas  → más alto, mejor<br>MTTR = horas de reparación ÷ n.º de fallas  → más bajo, mejor<br>Disponibilidad ≈ MTBF ÷ (MTBF + MTTR)</div>
+    <p>Al final del año se compara tu gestión contra la <b>estrategia reactiva</b> (reparar solo cuando se rompe) en el mismo parque y con el mismo viento.</p>
+    <p>¿Dudas con algún término o cálculo? Abre el <b>Glosario</b> desde la barra superior.</p>
+    <div class="btns"><button class="btn primary" type="button" data-act="start">Comenzar</button><button class="btn" type="button" data-act="gloss">Ver glosario</button></div>
+  </div>
+</dialog>
+
+<dialog id="dEnd"><div class="dlg" id="endBody"></div></dialog>
+
+<script>
+'use strict';
+/* =========================================================
+   1. Configuración del parque y de los componentes
+   ========================================================= */
+const HOURS = 365 * 24, PRE = 720, FC = 72;          // año simulado, historial de 30 días, pronóstico 72 h
+const N_T = 12, RATED = 2.3, PRICE = 65, CREWS = 2;  // turbinas, MW, US$/MWh, cuadrillas
+const CLIMB = 12, CRANE = 10;                         // límites de viento para trabajar (m/s)
+const SPEEDS = [0, 8, 24, 72];                        // horas simuladas por segundo
+const INSP = { log: 0, work: 6, cost: 3000 };
+
+// pf y life en "horas de carga": el desgaste avanza más rápido con la turbina a plena potencia
+const COMPS = [
+  { id: 'gbx', short: 'M', name: 'Multiplicadora', sensor: 'Vibración', unit: 'mm/s', dec: 1,
+    n: 2.4, k: 1.6, s: 0.3, warn: 8, alarm: 9, pf: 600, life: 24000, crane: true, insp: true,
+    fail: 'daño en rodamiento del eje intermedio',
+    prev: { log: 168, work: 48, cost: 160000 }, corr: { log: 504, work: 96, cost: 420000 } },
+  { id: 'gen', short: 'G', name: 'Generador', sensor: 'Temp. rodamiento', unit: '°C', dec: 0,
+    n: 56, k: 14, s: 1.2, warn: 93, alarm: 98, pf: 320, life: 22000, crane: true, insp: true,
+    fail: 'rodamiento lado no accionamiento',
+    prev: { log: 72, work: 24, cost: 55000 }, corr: { log: 168, work: 48, cost: 140000 } },
+  { id: 'pit', short: 'P', name: 'Pitch', sensor: 'Desviación de posición', unit: '°', dec: 2,
+    n: 0.15, k: 0.12, s: 0.06, warn: 2.0, alarm: 2.4, pf: 160, life: 7000, crane: false, insp: true,
+    fail: 'motor/encoder de pitch fuera de servicio',
+    prev: { log: 24, work: 8, cost: 6000 }, corr: { log: 24, work: 16, cost: 14000 } },
+  { id: 'cnv', short: 'C', name: 'Convertidor', sensor: 'Temp. IGBT', unit: '°C', dec: 0,
+    n: 48, k: 16, s: 1.8, warn: 90, alarm: 95, pf: 48, life: 7000, crane: false, insp: false,
+    fail: 'módulo IGBT quemado',
+    prev: { log: 0, work: 6, cost: 9000 }, corr: { log: 24, work: 12, cost: 22000 } },
+];
+
+/* =========================================================
+   2. Azar reproducible (misma semilla = mismo parque)
+   ========================================================= */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function hseed(...n) { let h = 2166136261; for (const x of n) { h ^= x; h = Math.imul(h, 16777619); h ^= h >>> 13; } return h >>> 0; }
+function gauss(r) { const u = 1 - r(), v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+// Viento horario: tendencia sinóptica + brisa de tarde + estación
+function genWind(seed) {
+  const n = PRE + HOURS + FC, w = new Float32Array(n), r = mulberry32(hseed(seed, 7));
+  let x = 0, y = 0;
+  for (let i = 0; i < n; i++) {
+    x = 0.985 * x + 0.17 * gauss(r);
+    y = 0.8 * y + 0.35 * gauss(r);
+    const diurnal = Math.sin(((i % 24) - 10) / 24 * 2 * Math.PI);
+    const season = Math.sin(i / HOURS * 2 * Math.PI);
+    w[i] = Math.max(0, 7.8 + 3.6 * x + 1.8 * diurnal + 0.8 * season + y);
+  }
+  return w;
+}
+function power(v) {
+  if (v < 3 || v >= 25) return 0;
+  if (v >= 12.5) return RATED;
+  return RATED * (v * v * v - 27) / (12.5 ** 3 - 27);
+}
+const ageInc = (v, load) => (v < 3 || v >= 25) ? 0.1 : 0.35 + 0.65 * load;
+
+/* =========================================================
+   3. Motor de simulación (sirve para el jugador y para la línea base reactiva)
+   ========================================================= */
+class Sim {
+  constructor(seed, wind, track) {
+    this.seed = seed; this.wind = wind; this.track = track;
+    this.h = 0; this.tid = 0; this.reactive = false; this.onEvent = null;
+    this.noise = mulberry32(hseed(seed, 1234));
+    const r = mulberry32(hseed(seed, 99));
+    this.T = [];
+    for (let i = 0; i < N_T; i++) {
+      const comps = COMPS.map((C, c) => ({
+        rem: 36 - C.life * Math.log(1 - this.lifeRng(i, c, 0)()), k: 0,
+        failed: false, failAt: 0, failId: -1, warned: false, ema: C.n,
+      }));
+      this.T.push({ i, wf: 0.9 + r() * 0.14, comps, tasks: [], down: false, p: 0, v: 0, uptime: 0, fails: 0,
+        inspection: null, hist: track ? COMPS.map(() => new Float32Array(PRE)) : null });
+    }
+    this.crews = Array.from({ length: CREWS }, (_, j) => ({ id: j, task: null }));
+    this.queue = [];
+    this.s = { uptime: 0, energy: 0, lost: 0, maint: 0, failures: 0, repaired: 0, repairSum: 0,
+      onTime: 0, premature: 0, late: 0, inspections: 0, failList: [] };
+    if (track) this.prefill();
+  }
+  lifeRng(t, c, k) { return mulberry32(hseed(this.seed, t + 1, c + 1, k + 1)); }
+  newLife(t, c, k) { const r = this.lifeRng(t, c, k); return COMPS[c].life / 0.8862 * Math.sqrt(-Math.log(1 - r())); }
+  emit(type, d) { if (this.onEvent) this.onEvent(type, d); }
+
+  // Valor del sensor: base según carga + desviación creciente dentro del intervalo P-F + ruido
+  signal(C, load, running, rem) {
+    const d = clamp(1 - rem / C.pf, 0, 1);
+    const dev = (C.alarm - C.n) * d * d;
+    let v = running ? C.n + C.k * load + dev : C.n * 0.62 + dev * 0.35;
+    v += C.s * gauss(this.noise);
+    if (this.noise() < 0.0015) v += (C.alarm - C.n) * (0.2 + 0.3 * this.noise()); // transitorio aislado
+    return v;
+  }
+
+  // Rellena 30 días de historial previo al inicio, para que ya existan tendencias
+  prefill() {
+    for (const T of this.T) {
+      const incs = new Float32Array(PRE), loads = new Float32Array(PRE), runs = new Uint8Array(PRE);
+      for (let p = 0; p < PRE; p++) {
+        const v = this.wind[p] * T.wf, P = power(v);
+        loads[p] = P / RATED; runs[p] = (v >= 3 && v < 25) ? 1 : 0; incs[p] = ageInc(v, loads[p]);
+      }
+      let acc = 0;
+      const remAdd = new Float32Array(PRE);
+      for (let p = PRE - 1; p >= 0; p--) { acc += incs[p]; remAdd[p] = acc; }
+      T.comps.forEach((comp, c) => {
+        const C = COMPS[c];
+        let ema = C.n;
+        for (let p = 0; p < PRE; p++) {
+          const val = this.signal(C, loads[p], runs[p], comp.rem + remAdd[p]);
+          T.hist[c][p] = val;
+          ema += (val - ema) / 8;
+        }
+        comp.ema = ema;
+      });
+    }
+  }
+
+  order(ti, type, c) {
+    const T = this.T[ti];
+    let spec, limit, C = null;
+    if (type === 'insp') {
+      if (T.tasks.some(t => t.type === 'insp')) return 'Ya hay una inspección programada en esta turbina';
+      spec = INSP; limit = CLIMB;
+    } else {
+      C = COMPS[c]; const comp = T.comps[c];
+      if (T.tasks.some(t => t.c === c && t.type !== 'insp')) return 'Ya hay un trabajo programado para este componente';
+      if (type === 'prev' && comp.failed) return 'El componente está en falla: corresponde correctivo';
+      if (type === 'corr' && !comp.failed) return 'El componente no está en falla';
+      spec = C[type]; limit = C.crane ? CRANE : CLIMB;
+    }
+    const task = { id: ++this.tid, t: ti, c, type, phase: spec.log > 0 ? 'log' : 'queue', log: spec.log, logTotal: spec.log,
+      work: spec.work, workTotal: spec.work, cost: spec.cost, limit, crew: null, started: false, active: false, blocked: false,
+      remAtOrder: C ? T.comps[c].rem : 0 };
+    T.tasks.push(task);
+    if (task.phase === 'queue') this.queue.push(task);
+    return task;
+  }
+
+  removeTask(task) {
+    const T = this.T[task.t];
+    T.tasks.splice(T.tasks.indexOf(task), 1);
+    const qi = this.queue.indexOf(task); if (qi >= 0) this.queue.splice(qi, 1);
+    if (task.crew != null) this.crews[task.crew].task = null;
+  }
+
+  fail(T, c) {
+    const comp = T.comps[c], C = COMPS[c], s = this.s;
+    comp.failed = true; comp.failAt = this.h; s.failures++; T.fails++;
+    T.down = true; T.p = 0;
+    const pending = T.tasks.filter(t => t.c === c && t.type === 'prev');
+    pending.forEach(t => this.removeTask(t));
+    const late = pending.length > 0;
+    if (late) s.late++;
+    comp.failId = s.failList.push({ t: T.i, c, at: this.h, end: null, late, warned: comp.warned }) - 1;
+    this.emit('fail', { T, c, C, late });
+    if (this.reactive) this.order(T.i, 'corr', c);
+  }
+
+  complete(task) {
+    const T = this.T[task.t], s = this.s;
+    this.removeTask(task);
+    s.maint += task.cost;
+    if (task.type === 'insp') {
+      s.inspections++;
+      T.inspection = { at: this.h, items: T.comps.map((comp, c) => this.diagnose(comp, COMPS[c])) };
+      this.emit('insp', { T });
+      return;
+    }
+    const c = task.c, comp = T.comps[c], C = COMPS[c];
+    if (task.type === 'prev') {
+      const premature = task.remAtOrder > 2 * C.pf;
+      if (premature) s.premature++; else s.onTime++;
+      this.emit('prev', { T, c, C, premature, days: Math.round(comp.rem / (0.65 * 24)) });
+    } else {
+      const rec = s.failList[comp.failId];
+      rec.end = this.h + 1; s.repaired++; s.repairSum += rec.end - rec.at;
+      comp.failed = false;
+      this.emit('corr', { T, c, C, ttr: rec.end - rec.at });
+    }
+    comp.k++; comp.rem = this.newLife(T.i, c, comp.k); comp.warned = false;
+  }
+
+  diagnose(comp, C) {
+    if (comp.failed) return { cls: 'bad', txt: 'En falla' };
+    if (!C.insp) return { cls: 'na', txt: 'No inspeccionable en terreno: vigila la tendencia de temperatura' };
+    const r = comp.rem;
+    if (r > 2 * C.pf) return { cls: 'ok', txt: 'Sin hallazgos' };
+    const days = Math.max(1, Math.round(r / (0.65 * 24) * (0.8 + 0.4 * this.noise())));
+    if (r > C.pf) return { cls: 'watch', txt: `Desgaste incipiente · vida estimada ~${days} d · vigilar` };
+    if (r > 0.4 * C.pf) return { cls: 'warn', txt: `Daño en progreso · ~${days} d · programar preventivo` };
+    return { cls: 'bad', txt: `Daño severo · ~${days} d · intervenir ya` };
+  }
+
+  step() {
+    const h = this.h, s = this.s, vPark = this.wind[PRE + h];
+    // Logística: repuestos y grúa
+    for (const T of this.T) for (const t of T.tasks) {
+      if (t.phase === 'log' && --t.log <= 0) { t.phase = 'queue'; this.queue.push(t); }
+    }
+    // Asignación de cuadrillas: primero los correctivos
+    for (const crew of this.crews) {
+      if (crew.task || !this.queue.length) continue;
+      let idx = this.queue.findIndex(t => t.type === 'corr'); if (idx < 0) idx = 0;
+      const t = this.queue.splice(idx, 1)[0];
+      t.phase = 'crew'; t.crew = crew.id; crew.task = t;
+    }
+    // Avance del trabajo, sujeto al viento
+    for (const crew of this.crews) {
+      const t = crew.task; if (!t) continue;
+      const ok = vPark < t.limit;
+      t.blocked = !ok; t.active = t.started || ok;
+      if (ok) { t.work--; t.started = true; }
+    }
+    // Turbinas: producción, desgaste, fallas y señales
+    for (const T of this.T) {
+      const v = vPark * T.wf; T.v = v;
+      const failed = T.comps.some(cp => cp.failed);
+      T.down = failed || T.tasks.some(t => t.phase === 'crew' && t.active);
+      const pot = power(v), P = T.down ? 0 : pot;
+      T.p = P; s.energy += P; s.lost += pot - P;
+      if (!T.down) { s.uptime++; T.uptime++; }
+      const load = P / RATED, running = !T.down && v >= 3 && v < 25;
+      const inc = T.down ? 0 : ageInc(v, load);
+      for (let c = 0; c < COMPS.length; c++) {
+        const comp = T.comps[c];
+        if (!comp.failed) { comp.rem -= inc; if (comp.rem <= 0) this.fail(T, c); }
+      }
+      if (this.track) {
+        for (let c = 0; c < COMPS.length; c++) {
+          const comp = T.comps[c], C = COMPS[c];
+          const val = this.signal(C, load, running, comp.rem);
+          T.hist[c][h % PRE] = val;
+          comp.ema += (val - comp.ema) / 8;
+          if (running && !comp.warned && !comp.failed && comp.ema > C.warn) {
+            comp.warned = true; this.emit('warn', { T, c, C });
+          }
+        }
+      }
+    }
+    // Trabajos terminados
+    for (const crew of this.crews) if (crew.task && crew.task.work <= 0) this.complete(crew.task);
+    this.h++;
+  }
+
+  summary() {
+    const s = this.s, H = Math.max(1, this.h) * N_T;
+    let rs = s.repairSum, n = s.repaired, pending = 0;
+    // Las fallas sin reparar siguen abiertas: suman su tiempo y el costo del correctivo pendiente
+    for (const rec of s.failList) if (rec.end == null) { rs += this.h - rec.at; n++; pending += COMPS[rec.c].corr.cost; }
+    return {
+      avail: this.h ? s.uptime / H : 1, mtbf: s.failures ? s.uptime / s.failures : Infinity, mttr: n ? rs / n : 0,
+      failures: s.failures, energy: s.energy, lost: s.lost, lostRev: s.lost * PRICE, maint: s.maint, pending,
+      total: s.maint + pending + s.lost * PRICE, onTime: s.onTime, premature: s.premature, late: s.late, inspections: s.inspections,
+    };
+  }
+}
+
+function runBaseline(seed, wind) {
+  const b = new Sim(seed, wind, false);
+  b.reactive = true;
+  while (b.h < HOURS) b.step();
+  return b.summary();
+}
+
+/* =========================================================
+   4. Formatos
+   ========================================================= */
+const nf = (x, d = 0) => x.toLocaleString('es-CL', { minimumFractionDigits: d, maximumFractionDigits: d });
+function money(x) {
+  if (Math.abs(x) >= 1e6) return 'US$' + nf(x / 1e6, 2) + ' M';
+  if (Math.abs(x) >= 1e3) return 'US$' + nf(x / 1e3, x >= 1e5 ? 0 : 1) + 'k';
+  return 'US$' + nf(x);
+}
+const dur = h => h < 48 ? `${Math.round(h)} h` : `${nf(h / 24, h < 240 ? 1 : 0)} d`;
+const tName = i => 'WTG-' + String(i + 1).padStart(2, '0');
+
+// Tabla del glosario generada desde COMPS, para que coincida siempre con el modelo
+function buildGlossary() {
+  const lim = v => nf(v, v < 10 ? 1 : 0);
+  const logi = h => h ? `${dur(h)} log.` : 'sin logística';
+  $('#gComps').innerHTML = COMPS.map(C => `<tr>
+    <td>${C.name}</td><td>${C.sensor} (${C.unit})</td><td>${lim(C.warn)} / ${lim(C.alarm)}</td>
+    <td>~${dur(C.pf / 0.6)}</td>
+    <td>${logi(C.prev.log)} + ${dur(C.prev.work)} trabajo · ${money(C.prev.cost)}</td>
+    <td>${logi(C.corr.log)} + ${dur(C.corr.work)} trabajo · ${money(C.corr.cost)}</td></tr>`).join('');
+}
+const stamp = h => `D${Math.floor(h / 24) + 1} ${String(h % 24).padStart(2, '0')}:00`;
+
+/* =========================================================
+   5. Interfaz
+   ========================================================= */
+const $ = s => document.querySelector(s);
+let G = null, COL = {};
+const tiles = [];
+
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  for (const k of ['ink', 'muted', 'line', 'accent', 'warn', 'bad', 'ok', 'surface', 'surface-2']) COL[k] = cs.getPropertyValue('--' + k).trim();
+}
+function fit(cv) {
+  const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h);
+  return [x, w, h];
+}
+function setHTML(el, html) { if (el._h !== html) { el.innerHTML = html; el._h = html; } }
+
+function buildGrid() {
+  const grid = $('#grid'); grid.innerHTML = ''; tiles.length = 0;
+  const blade = 'M26.1 21.5 L27 3.5 L28.3 21.5 Z';
+  for (let i = 0; i < N_T; i++) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tile'; b.dataset.act = 'sel'; b.dataset.i = i;
+    b.setAttribute('aria-label', 'Ver ' + tName(i));
+    b.innerHTML = `<span class="tile-id">${tName(i)}</span><span class="tile-badge" hidden>⚠ SCADA</span>
+      <svg viewBox="0 0 54 64" aria-hidden="true"><path class="tower" d="M25.6 23 L28.4 23 L30 63 L24 63 Z"/>
+      <rect class="nac" x="23" y="19" width="12" height="5" rx="1.5"/>
+      <g class="rotor"><path d="${blade}"/><path d="${blade}" transform="rotate(120 27 21.5)"/><path d="${blade}" transform="rotate(240 27 21.5)"/></g>
+      <circle class="hub" cx="27" cy="21.5" r="2"/></svg>
+      <span class="tile-row"><span class="tile-p">0 MW</span><span class="tile-st">—</span></span>
+      <canvas aria-hidden="true"></canvas>`;
+    grid.appendChild(b);
+    tiles.push({ el: b, rotor: b.querySelector('.rotor'), p: b.querySelector('.tile-p'), st: b.querySelector('.tile-st'),
+      badge: b.querySelector('.tile-badge'), cv: b.querySelector('canvas'), ang: Math.random() * 360 });
+  }
+}
+
+function tState(T) {
+  if (T.comps.some(c => c.failed)) {
+    const working = T.tasks.some(t => t.type === 'corr' && t.phase === 'crew' && t.active);
+    const ordered = T.tasks.some(t => t.type === 'corr');
+    return ['s-fail', working ? 'Reparando' : ordered ? 'Falla · en curso' : 'Falla'];
+  }
+  if (T.down) return ['s-maint', T.tasks.some(t => t.type === 'insp' && t.active) ? 'Inspección' : 'Mantención'];
+  if (T.v >= 25) return ['s-idle', 'Viento extremo'];
+  if (T.v < 3) return ['s-idle', 'Sin viento'];
+  return ['s-run', 'Operando'];
+}
+
+function updateTiles(drawSparks) {
+  const sim = G.sim;
+  tiles.forEach((tl, i) => {
+    const T = sim.T[i], [cls, txt] = tState(T);
+    tl.el.className = 'tile ' + cls + (G.sel === i ? ' sel' : '');
+    tl.p.textContent = nf(T.p, 2) + ' MW';
+    tl.st.textContent = txt;
+    tl.badge.hidden = !T.comps.some(c => c.warned && !c.failed);
+    if (drawSparks) drawSpark(T, tl.cv);
+  });
+}
+
+// Mini-tendencias: promedio diario de las 4 señales, normalizadas entre valor base y alarma
+function drawSpark(T, cv) {
+  const [x, w, h] = fit(cv), sim = G.sim, rh = h / 4;
+  x.font = '600 8px ' + getComputedStyle(document.body).getPropertyValue('--mono');
+  COMPS.forEach((C, c) => {
+    const top = c * rh, buf = T.hist[c];
+    x.fillStyle = COL.muted; x.fillText(C.short, 0, top + rh - 2);
+    const yOf = m => top + rh - 1 - clamp((m - C.n) / (C.alarm - C.n), 0, 1) * (rh - 2);
+    x.strokeStyle = COL.line; x.setLineDash([2, 2]); x.lineWidth = 1;
+    const yw = yOf(C.warn); x.beginPath(); x.moveTo(10, yw); x.lineTo(w, yw); x.stroke(); x.setLineDash([]);
+    x.strokeStyle = COL.accent; x.lineWidth = 1.2; x.beginPath();
+    for (let d = 0; d < 30; d++) {
+      let sum = 0;
+      for (let k = 0; k < 24; k++) { const hh = sim.h - PRE + d * 24 + k; sum += buf[((hh % PRE) + PRE) % PRE]; }
+      const px = 10 + d / 29 * (w - 11), py = yOf(sum / 24);
+      d ? x.lineTo(px, py) : x.moveTo(px, py);
+    }
+    x.stroke();
+  });
+}
+
+function drawChart(cv, T, c) {
+  const [x, w, h] = fit(cv), C = COMPS[c], buf = T.hist[c], sim = G.sim;
+  const lo = C.n * 0.55, hi = C.alarm + (C.alarm - C.n) * 0.12, L = 0, R = w - 44;
+  const yOf = v => h - 14 - clamp((v - lo) / (hi - lo), 0, 1.04) * (h - 20);
+  const at = i => buf[(((sim.h - PRE + i) % PRE) + PRE) % PRE];
+  x.font = '10px ' + getComputedStyle(document.body).getPropertyValue('--mono');
+  // Umbrales
+  [[C.warn, COL.warn, 'adv.', 10], [C.alarm, COL.bad, 'alarma', -2]].forEach(([v, col, lab, dy]) => {
+    const y = yOf(v); x.strokeStyle = col; x.setLineDash([4, 3]); x.lineWidth = 1;
+    x.beginPath(); x.moveTo(L, y); x.lineTo(R, y); x.stroke(); x.setLineDash([]);
+    x.fillStyle = col; x.fillText(lab, R + 4, y + dy);
+  });
+  // Señal horaria
+  x.strokeStyle = COL.muted; x.globalAlpha = 0.45; x.lineWidth = 1; x.beginPath();
+  for (let i = 0; i < PRE; i++) { const px = L + i / (PRE - 1) * (R - L), py = yOf(at(i)); i ? x.lineTo(px, py) : x.moveTo(px, py); }
+  x.stroke(); x.globalAlpha = 1;
+  // Media móvil 24 h
+  x.strokeStyle = COL.accent; x.lineWidth = 2; x.beginPath();
+  let sum = 0;
+  for (let i = 0; i < PRE; i++) {
+    sum += at(i); if (i >= 24) sum -= at(i - 24);
+    if (i >= 23) { const px = L + i / (PRE - 1) * (R - L), py = yOf(sum / 24); i > 23 ? x.lineTo(px, py) : x.moveTo(px, py); }
+  }
+  x.stroke();
+  x.fillStyle = COL.muted;
+  [['−30 d', 0], ['−20 d', 1 / 3], ['−10 d', 2 / 3]].forEach(([t, f]) => x.fillText(t, L + f * (R - L), h - 2));
+  x.fillText('ahora', R - 10, h - 2);
+}
+
+function drawWind() {
+  const cv = $('#wChart'), [x, w, h] = fit(cv), sim = G.sim, wind = G.wind;
+  const past = 24, total = past + FC, vmax = 22, yOf = v => h - 4 - clamp(v / vmax, 0, 1) * (h - 8);
+  const xOf = i => i / (total - 1) * w;
+  x.fillStyle = COL.bad; x.globalAlpha = 0.07; x.fillRect(0, 0, w, yOf(CLIMB)); x.globalAlpha = 1;
+  [[CRANE, COL.warn], [CLIMB, COL.bad]].forEach(([v, col]) => {
+    x.strokeStyle = col; x.setLineDash([4, 3]); x.beginPath(); x.moveTo(0, yOf(v)); x.lineTo(w, yOf(v)); x.stroke();
+  });
+  x.setLineDash([]);
+  const nowX = xOf(past - 1);
+  x.strokeStyle = COL.line; x.beginPath(); x.moveTo(nowX, 0); x.lineTo(nowX, h); x.stroke();
+  const val = i => { const idx = PRE + sim.h - past + i; return wind[clamp(idx, 0, wind.length - 1)]; };
+  // Pronóstico suavizado (media de 6 h)
+  const smooth = i => { let s = 0; for (let k = -3; k < 3; k++) s += val(clamp(i + k, 0, total - 1)); return s / 6; };
+  x.lineWidth = 2; x.strokeStyle = COL.accent; x.beginPath();
+  for (let i = 0; i < past; i++) { i ? x.lineTo(xOf(i), yOf(val(i))) : x.moveTo(xOf(i), yOf(val(i))); }
+  x.stroke();
+  x.setLineDash([3, 3]); x.beginPath(); x.moveTo(nowX, yOf(val(past - 1)));
+  for (let i = past; i < total; i++) x.lineTo(xOf(i), yOf(smooth(i)));
+  x.stroke(); x.setLineDash([]);
+}
+
+function taskStatus(t) {
+  if (t.phase === 'log') return t.type === 'corr' ? `Esperando repuestos/grúa · ${dur(t.log)}` : `Planificando y acopiando · ${dur(t.log)}`;
+  if (t.phase === 'queue') return 'En cola, esperando cuadrilla';
+  if (t.blocked) return t.started ? `Detenido por viento · faltan ${dur(t.work)}` : `En sitio, esperando viento < ${t.limit} m/s`;
+  return `En ejecución · faltan ${dur(t.work)}`;
+}
+const tLabel = t => t.type === 'insp' ? 'Inspección' : (t.type === 'prev' ? 'Preventivo ' : 'Correctivo ') + COMPS[t.c].name.toLowerCase();
+
+function updateCrews() {
+  const sim = G.sim;
+  setHTML($('#crews'), sim.crews.map((cr, j) => {
+    const t = cr.task, name = 'Cuadrilla ' + 'AB'[j];
+    if (!t) return `<li><b>${name}</b> · <span class="muted">disponible</span></li>`;
+    const pct = Math.round((1 - t.work / t.workTotal) * 100);
+    return `<li><b>${name}</b> · ${tName(t.t)} · ${tLabel(t)}<br><span class="muted">${taskStatus(t)}</span><span class="prog"><i style="width:${pct}%"></i></span></li>`;
+  }).join(''));
+  const all = sim.T.flatMap(T => T.tasks);
+  const nLog = all.filter(t => t.phase === 'log').length;
+  $('#qInfo').textContent = `En cola: ${sim.queue.length} · En logística: ${nLog}`;
+  $('#crewSum').textContent = `${sim.crews.filter(c => !c.task).length}/${CREWS} libres`;
+}
+
+function renderPanel() {
+  const T = G.sim.T[G.sel], P = $('#panel');
+  P.innerHTML = `
+    <div class="p-head"><div><span class="eyebrow">Turbina seleccionada</span><h2>${tName(T.i)}</h2></div><span class="pill" id="pPill"></span></div>
+    <dl class="meta">
+      <div><dt>Potencia</dt><dd id="pP"></dd></div><div><dt>Viento</dt><dd id="pV"></dd></div>
+      <div><dt>Disp.</dt><dd id="pA"></dd></div><div><dt>Fallas</dt><dd id="pF"></dd></div>
+    </dl>
+    <div class="ptasks" id="pTasks"></div>
+    ${COMPS.map((C, c) => `<div class="comp">
+      <div class="comp-h"><div><b>${C.name}</b><small>${C.sensor} · ${C.unit} · adv. ${nf(C.warn, C.dec ? 1 : 0)} / alarma ${nf(C.alarm, C.dec ? 1 : 0)}</small></div><output id="cv${c}"></output></div>
+      <canvas id="ch${c}" aria-label="Tendencia de ${C.sensor} últimos 30 días"></canvas>
+      <div id="ca${c}"></div></div>`).join('')}
+    <div class="p-foot"><div id="pIns"></div><div class="insp" id="pInsp"></div></div>`;
+  updatePanel();
+}
+
+function updatePanel() {
+  const sim = G.sim, T = sim.T[G.sel];
+  const [cls, txt] = tState(T);
+  const pill = $('#pPill'); pill.className = 'pill ' + cls; pill.textContent = txt;
+  $('#pP').textContent = nf(T.p, 2) + ' MW';
+  $('#pV').textContent = nf(T.v, 1) + ' m/s';
+  $('#pA').textContent = nf(sim.h ? T.uptime / sim.h * 100 : 100, 1) + '%';
+  $('#pF').textContent = T.fails;
+  setHTML($('#pTasks'), T.tasks.map(t => `<div class="ptask"><b>${tLabel(t)}</b> · ${taskStatus(t)}</div>`).join(''));
+  COMPS.forEach((C, c) => {
+    const comp = T.comps[c], cur = T.hist[c][((sim.h - 1) % PRE + PRE) % PRE];
+    const out = $('#cv' + c);
+    out.textContent = comp.failed ? 'FALLA' : nf(cur, C.dec) + ' ' + C.unit;
+    out.className = comp.failed || cur >= C.alarm ? 'a' : cur >= C.warn ? 'w' : '';
+    const task = T.tasks.find(t => t.c === c && t.type !== 'insp');
+    let html;
+    if (task) html = `<button class="act" disabled><span>${tLabel(task)} programado</span><span>${task.phase === 'crew' && !task.blocked ? 'en curso' : 'pendiente'}</span></button>`;
+    else if (comp.failed) html = `<button class="act danger pulse" data-act="corr" data-t="${T.i}" data-c="${c}"><span>Enviar correctivo</span><span>~${dur(C.corr.log + C.corr.work)} · ${money(C.corr.cost)}</span></button>`;
+    else html = `<button class="act" data-act="prev" data-t="${T.i}" data-c="${c}"><span>Programar preventivo</span><span>~${dur(C.prev.log + C.prev.work)} · ${money(C.prev.cost)}</span></button>`;
+    setHTML($('#ca' + c), html);
+    drawChart($('#ch' + c), T, c);
+  });
+  const hasInsp = T.tasks.some(t => t.type === 'insp');
+  setHTML($('#pIns'), `<button class="act" data-act="insp" data-t="${T.i}" ${hasInsp ? 'disabled' : ''}><span>${hasInsp ? 'Inspección programada' : 'Inspeccionar turbina'}</span><span>${INSP.work} h · ${money(INSP.cost)}</span></button>`);
+  const I = T.inspection;
+  setHTML($('#pInsp'), I ? `<span class="eyebrow">Última inspección · ${stamp(I.at)}</span><ul>${I.items.map((it, c) => `<li class="${it.cls}"><b>${COMPS[c].name}:</b> ${it.txt}</li>`).join('')}</ul>` : '<span class="eyebrow">Sin inspecciones aún</span>');
+}
+
+function updateKpis() {
+  const sm = G.sim.summary(), sim = G.sim;
+  $('#kAv').textContent = nf(sm.avail * 100, 2) + '%';
+  $('#kMtbf').textContent = sm.failures ? nf(sm.mtbf) + ' h' : '—';
+  $('#kMtbfS').textContent = sm.failures ? `≈ ${nf(sm.mtbf / 24)} días por turbina` : 'sin fallas aún';
+  $('#kMttr').textContent = sm.failures ? nf(sm.mttr) + ' h' : '—';
+  $('#kFail').textContent = sm.failures;
+  $('#kFailS').textContent = `${sm.onTime} preventivos a tiempo · ${sm.premature} prematuros`;
+  $('#kEn').textContent = nf(sm.energy) + ' MWh';
+  $('#kEnS').textContent = nf(sm.lost) + ' MWh no generados';
+  $('#kCost').textContent = money(sm.maint);
+  $('#kCostS').textContent = `+ ${money(sm.lostRev)} energía perdida`;
+  const day = Math.min(365, Math.floor(sim.h / 24) + 1);
+  $('#day').textContent = day;
+  $('#hour').textContent = String(sim.h % 24).padStart(2, '0') + ':00';
+  $('#yearBar').style.width = (sim.h / HOURS * 100) + '%';
+  const v = G.wind[PRE + Math.min(sim.h, HOURS - 1)];
+  $('#wNow').textContent = nf(v, 1) + ' m/s';
+  const fc = $('#fClimb'), fg = $('#fCrane');
+  fc.className = 'flag ' + (v < CLIMB ? 'ok' : 'no'); fc.textContent = v < CLIMB ? 'Altura OK' : 'Altura suspendida';
+  fg.className = 'flag ' + (v < CRANE ? 'ok' : 'no'); fg.textContent = v < CRANE ? 'Grúa OK' : 'Grúa suspendida';
+  $('#parkP').textContent = nf(sim.T.reduce((a, T) => a + T.p, 0), 1) + ' MW';
+}
+
+function refresh(sparks) {
+  updateKpis(); updateTiles(sparks); updateCrews(); updatePanel(); drawWind();
+}
+
+/* ---------- Bitácora y avisos ---------- */
+function log(msg, cls = '') {
+  const li = document.createElement('li'); li.className = cls;
+  li.innerHTML = `<time>${stamp(G.sim.h)}</time><span>${msg}</span>`;
+  const L = $('#log'); L.prepend(li);
+  while (L.children.length > 120) L.lastChild.remove();
+}
+// ms = 0: el aviso queda hasta que se atiende o se cierra (fallas)
+function toast(html, cls = '', ms = 7000, key = '') {
+  const d = document.createElement('div'); d.className = 'toast ' + cls; d.innerHTML = html;
+  if (key) d.dataset.key = key;
+  $('#toasts').prepend(d);
+  const box = $('#toasts'); while (box.children.length > 4) box.lastChild.remove();
+  if (ms) setTimeout(() => d.remove(), ms);
+  return d;
+}
+
+function onEvent(type, d) {
+  const n = d.T ? tName(d.T.i) : '';
+  if (type === 'fail') {
+    log(`${n} · FALLA ${d.C.name.toLowerCase()}: ${d.C.fail}${d.late ? ' — el preventivo llegó tarde' : ''}`, 'e-fail');
+    toast(`<b>${n} · Falla en ${d.C.name.toLowerCase()}</b><br>${d.C.fail}. Turbina detenida.
+      <div class="row"><button class="go" data-act="corr" data-t="${d.T.i}" data-c="${d.c}">Enviar correctivo</button><button data-act="view" data-t="${d.T.i}">Ver turbina</button><button data-act="dismiss">Cerrar</button></div>`, 'bad', 0, `f${d.T.i}-${d.c}`);
+    if ($('#autoPause').checked) pause(true);
+  } else if (type === 'warn') {
+    log(`${n} · Advertencia SCADA: ${d.C.sensor.toLowerCase()} (${d.C.name.toLowerCase()}) sobre ${nf(d.C.warn, d.C.dec ? 1 : 0)} ${d.C.unit}`, 'e-warn');
+    toast(`<b>${n} · Advertencia SCADA</b><br>${d.C.name}: ${d.C.sensor.toLowerCase()} sobre umbral.<div class="row"><button data-act="view" data-t="${d.T.i}">Ver turbina</button></div>`, 'warn');
+  } else if (type === 'insp') {
+    const f = d.T.inspection.items.map((it, c) => it.cls === 'warn' || it.cls === 'bad' || it.cls === 'watch' ? COMPS[c].name.toLowerCase() : null).filter(Boolean);
+    log(`${n} · Inspección completada: ${f.length ? 'hallazgos en ' + f.join(', ') : 'sin hallazgos'}`, f.length ? 'e-warn' : 'e-ok');
+  } else if (type === 'prev') {
+    log(d.premature
+      ? `${n} · Preventivo ${d.C.name.toLowerCase()} completado — el componente estaba sano: intervención prematura`
+      : `${n} · Preventivo ${d.C.name.toLowerCase()} completado — falla evitada`, d.premature ? 'e-warn' : 'e-ok');
+  } else if (type === 'corr') {
+    log(`${n} · Correctivo ${d.C.name.toLowerCase()} completado · tiempo de reparación ${dur(d.ttr)}`, 'e-ok');
+  }
+}
+
+function doOrder(ti, type, c) {
+  const res = G.sim.order(ti, type, c);
+  if (typeof res === 'string') { toast(res, '', 3500); return; }
+  const what = type === 'insp' ? `inspección (${money(INSP.cost)})` : `${type === 'prev' ? 'preventivo' : 'correctivo'} ${COMPS[c].name.toLowerCase()} (${money(res.cost)})`;
+  log(`${tName(ti)} · Orden emitida: ${what}`);
+  if (type === 'corr') document.querySelector(`.toast[data-key="f${ti}-${c}"]`)?.remove();
+  refresh(false);
+}
+
+/* ---------- Control de tiempo ---------- */
+function setSpeed(s) { G.speed = s; G.paused = false; syncSpeed(); }
+function pause(p) { G.paused = p; syncSpeed(); }
+function syncSpeed() {
+  document.querySelectorAll('.seg button').forEach(b => {
+    b.classList.toggle('on', b.dataset.act === 'pause' ? G.paused : (!G.paused && +b.dataset.s === G.speed));
+  });
+}
+
+let last = performance.now(), lastSpark = -1;
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (G && !G.paused && !G.over) {
+    G.acc += dt * SPEEDS[G.speed];
+    let n = 0;
+    while (G.acc >= 1 && n < 300) {
+      G.acc -= 1; G.sim.step(); n++;
+      if (G.sim.h >= HOURS) { endGame(); break; }
+      if (G.paused) break;
+    }
+    if (n) {
+      const day = Math.floor(G.sim.h / 6);
+      refresh(day !== lastSpark); lastSpark = day;
+    }
+  }
+  if (G) {
+    tiles.forEach((tl, i) => {
+      const T = G.sim.T[i];
+      const rpm = G.paused || G.over || T.down ? 0 : T.v < 3 || T.v >= 25 ? 8 : 70 + 160 * (T.p / RATED);
+      tl.ang = (tl.ang + rpm * dt) % 360;
+      tl.rotor.setAttribute('transform', `rotate(${tl.ang.toFixed(1)} 27 21.5)`);
+    });
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- Partida ---------- */
+function newGame(seed) {
+  const wind = genWind(seed), sim = new Sim(seed, wind, true);
+  sim.onEvent = onEvent;
+  G = { seed, wind, sim, speed: 2, paused: true, over: false, acc: 0, sel: G ? G.sel : 0 };
+  $('#log').innerHTML = ''; $('#toasts').innerHTML = '';
+  $('#seedLbl').textContent = 'Parque #' + seed;
+  buildGrid(); renderPanel(); syncSpeed(); refresh(true);
+  log(`Comienza la operación del parque #${seed}. 12 turbinas en servicio.`, 'e-ok');
+}
+
+function endGame() {
+  G.over = true; pause(true);
+  const me = G.sim.summary(), base = runBaseline(G.seed, G.wind);
+  const saving = base.total - me.total, pct = base.total ? saving / base.total * 100 : 0;
+  const rank = pct >= 50 ? 'Referente en confiabilidad' : pct >= 35 ? 'Jefe de Parque' : pct >= 20 ? 'Supervisor de mantenimiento'
+    : pct >= 5 ? 'Técnico reactivo' : 'Apagaincendios';
+  const row = (lab, a, b, fmt, higher) => {
+    const aw = higher ? a > b : a < b, bw = higher ? b > a : b < a;
+    return `<tr><td>${lab}</td><td class="${aw ? 'win' : ''}">${fmt(a)}</td><td class="${bw ? 'win' : ''}">${fmt(b)}</td></tr>`;
+  };
+  const h = v => isFinite(v) ? nf(v) + ' h' : '—';
+  const totalPrev = me.onTime + me.premature;
+  $('#endBody').innerHTML = `
+    <span class="eyebrow">Fin del año · Parque #${G.seed}</span>
+    <h2>${rank}</h2>
+    <p class="rank">${saving >= 0 ? "Ahorro" : "Sobrecosto"} frente a la estrategia reactiva</p>
+    <div class="big ${saving >= 0 ? 'pos' : 'neg'}">${saving >= 0 ? '' : '−'}${money(Math.abs(saving))} <small style="font-size:16px">(${nf(Math.abs(pct), 1)}%)</small></div>
+    <table class="cmp">
+      <thead><tr><th>Indicador</th><th>Tu gestión</th><th>Reactiva</th></tr></thead>
+      <tbody>
+        ${row('Disponibilidad', me.avail, base.avail, v => nf(v * 100, 2) + '%', true)}
+        ${row('MTBF', me.mtbf, base.mtbf, h, true)}
+        ${row('MTTR', me.mttr, base.mttr, h, false)}
+        ${row('Fallas', me.failures, base.failures, v => nf(v), false)}
+        ${row('Energía generada', me.energy, base.energy, v => nf(v) + ' MWh', true)}
+        ${row('Costo mantenimiento', me.maint, base.maint, money, false)}
+        ${me.pending || base.pending ? row('Correctivos pendientes', me.pending, base.pending, money, false) : ''}
+        ${row('Energía no generada', me.lostRev, base.lostRev, money, false)}
+        ${row('Costo total', me.total, base.total, money, false)}
+      </tbody>
+    </table>
+    <ul>
+      <li>Preventivos a tiempo: <b>${me.onTime}</b> de ${totalPrev}${me.premature ? ` · <b>${me.premature}</b> prematuros (componente sano)` : ''}.</li>
+      <li>Fallas en que el preventivo llegó tarde: <b>${me.late}</b>. Inspecciones realizadas: <b>${me.inspections}</b>.</li>
+      <li>${me.mttr < base.mttr ? 'Bajaste el MTTR: anticiparte evita los correctivos largos con espera de grúa y repuestos.' : 'Tu MTTR quedó alto: despacha los correctivos apenas ocurre la falla y aprovecha las paradas para hacer preventivos en la misma turbina.'}</li>
+    </ul>
+    <div class="btns">
+      <button class="btn primary" type="button" data-act="again-new">Jugar otro parque</button>
+      <button class="btn" type="button" data-act="again-same">Repetir este parque</button>
+      <button class="btn" type="button" data-act="close-end">Ver el parque</button>
+    </div>`;
+  $('#dEnd').showModal();
+}
+
+/* ---------- Eventos ---------- */
+function select(i) {
+  G.sel = i; renderPanel(); updateTiles(false);
+  if (window.innerWidth < 1060) $('#panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || !G) return;
+  const a = b.dataset.act, t = +b.dataset.t, c = +b.dataset.c;
+  switch (a) {
+    case 'sel': select(+b.dataset.i); break;
+    case 'view': select(t); break;
+    case 'prev': case 'corr': doOrder(t, a, c); break;
+    case 'dismiss': b.closest('.toast')?.remove(); break;
+    case 'insp': doOrder(t, 'insp'); break;
+    case 'pause': if (!G.over) pause(!G.paused); break;
+    case 'speed': if (!G.over) setSpeed(+b.dataset.s); break;
+    case 'help': pause(true); $('#dIntro').showModal(); break;
+    case 'gloss': if (!G.over) pause(true); $('#dIntro').open && $('#dIntro').close(); $('#glosario').scrollIntoView({ behavior: 'smooth' }); break;
+    case 'start': $('#dIntro').close(); if (!G.over) setSpeed(G.speed); break;
+    case 'theme': {
+      const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('theme', next); } catch (err) {}
+      readColors(); refresh(true); break;
+    }
+    case 'again-new': $('#dEnd').close(); newGame(Math.floor(Math.random() * 9000) + 1000); setSpeed(2); break;
+    case 'again-same': $('#dEnd').close(); newGame(G.seed); setSpeed(2); break;
+    case 'close-end': $('#dEnd').close(); break;
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && G && !G.over && !document.querySelector('dialog[open]') && !e.target.closest('input')) {
+    e.preventDefault(); pause(!G.paused);
+  }
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); if (G) refresh(true); });
+window.addEventListener('resize', () => { if (G) refresh(true); });
+
+readColors();
+buildGlossary();
+newGame(Math.floor(Math.random() * 9000) + 1000);
+$('#dIntro').showModal();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

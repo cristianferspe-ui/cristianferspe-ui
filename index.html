@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261026">
+<link rel="stylesheet" href="styles.css?v=20261027">
 <script>
   // Aplica el tema guardado antes de pintar (evita el parpadeo claro/oscuro)
   try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
@@ -248,6 +248,30 @@
     <div class="wrap section-grid">
       <div class="section-label"><span class="num">03 /</span><h2>Proyectos de ingeniería</h2></div>
       <div class="section-body">
+        <article class="feature" data-reveal>
+          <a class="feature-img top" href="proyectos/jefe-de-parque/" tabindex="-1" aria-hidden="true">
+            <img src="proyectos/jefe-de-parque/img/captura-800.webp" srcset="proyectos/jefe-de-parque/img/captura-800.webp 800w, proyectos/jefe-de-parque/img/captura-1200.webp 1200w" sizes="(min-width: 1200px) 845px, (min-width: 960px) 72vw, 100vw" alt="" loading="lazy" width="800" height="500">
+          </a>
+          <div class="feature-body">
+            <p class="meta">Proyecto personal · Simulador interactivo · 2026</p>
+            <h3>Jefe de Parque: simulador de mantenimiento predictivo en un parque eólico</h3>
+            <div class="figures">
+              <div><strong>12 × 2,3 MW</strong><span>turbinas, 1 año simulado</span></div>
+              <div><strong>4 señales</strong><span>SCADA por turbina</span></div>
+              <div><strong>~55 %</strong><span>ahorro leyendo tendencias vs. reactivo</span></div>
+            </div>
+            <ul class="dash">
+              <li>Juego para el navegador: operas el parque, lees tendencias SCADA y decides cuándo <strong>inspeccionar, hacer preventivo o despachar un correctivo</strong>.</li>
+              <li><strong>Modelo de degradación con intervalo P-F:</strong> la señal se desvía antes de la falla, con efecto de carga, ruido y transitorios, para que el diagnóstico requiera criterio.</li>
+              <li><strong>Restricciones de terreno:</strong> 2 cuadrillas, logística de repuestos y grúa, y límites de viento de 12 m/s para trabajo en altura y 10 m/s para la grúa.</li>
+              <li><strong>MTBF, MTTR y disponibilidad en vivo.</strong> Al cerrar el año, tu gestión se compara contra la estrategia reactiva con el mismo viento y las mismas vidas de componentes.</li>
+              <li>Simulación horaria en JavaScript, sin dependencias, con curva de potencia, desgaste según carga y vidas Weibull. La dificultad se calibró simulando en lotes las estrategias reactiva, por advertencia SCADA y por tendencia.</li>
+            </ul>
+            <div class="cta">
+              <a class="btn primary" href="proyectos/jefe-de-parque/">Jugar el simulador <span class="arr">→</span></a>
+            </div>
+          </div>
+        </article>
         <article class="feature" data-reveal>
           <a class="feature-img" href="proyectos/manipulador/" tabindex="-1" aria-hidden="true">
             <img src="proyectos/manipulador/img/plano_autocad-800.webp" srcset="proyectos/manipulador/img/plano_autocad-800.webp 800w, proyectos/manipulador/img/plano_autocad-1200.webp 1200w" sizes="(min-width: 1200px) 845px, (min-width: 960px) 72vw, 100vw" alt="" loading="lazy" width="800" height="674">
