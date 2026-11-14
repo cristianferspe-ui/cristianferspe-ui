@@ -36,7 +36,7 @@
      El número se arma aquí para que no quede en texto plano en el HTML (menos spam de bots) */
   function initContact() {
     var n = ["56", "9", "3414", "4545"];
-    var wa = $("#wa"), tel = $("#tel");
+    var wa = $("#wa"), tel = $("#tel"), vcf = $("#vcf");
     if (wa) {
       var msg = encodeURIComponent("Hola Cristianfer, vi tu sitio web y me gustaría conversar sobre una oportunidad.");
       wa.href = "https://wa.me/" + n.join("") + "?text=" + msg;
@@ -44,6 +44,23 @@
     if (tel) {
       tel.href = "tel:+" + n.join("");
       tel.textContent = "+" + n.join(" ");
+    }
+    // Tarjeta de contacto: en el celular se agrega a los contactos con un toque
+    if (vcf) {
+      var card = [
+        "BEGIN:VCARD", "VERSION:3.0",
+        "N:Silva Portillo;Cristianfer;;;",
+        "FN:Cristianfer Silva Portillo",
+        "TITLE:Especialista de campo en parques eólicos · O&M y puesta en marcha",
+        "TEL;TYPE=CELL:+" + n.join(""),
+        "EMAIL;TYPE=INTERNET:cristianferspe@gmail.com",
+        "URL:https://cristianferspe-ui.github.io/cristianferspe-ui/",
+        "URL:https://www.linkedin.com/in/cristianfer-silva-portillo",
+        "ADR;TYPE=HOME:;;;Coquimbo;;;Chile",
+        "END:VCARD"
+      ].join("\r\n");
+      vcf.href = "data:text/vcard;charset=utf-8," + encodeURIComponent(card);
+      vcf.hidden = false;
     }
   }
 

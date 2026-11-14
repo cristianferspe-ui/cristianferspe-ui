@@ -253,7 +253,43 @@ dialog::backdrop { background: rgba(5, 14, 17, .6); }
 .whys li:last-child::before { background: var(--bad); color: #fff; }
 .trap { border: 1px solid var(--warn); border-left-width: 4px; padding: 10px 12px; font-size: 13.5px; margin-top: 8px; }
 .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+/* ---------- Autor: contacto para quien llega directo al juego ---------- */
+.author { border-top: 1px solid var(--line); background: var(--surface); }
+.author-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 32px; padding-block: 24px; }
+.author-k { margin: 0; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.author-name { margin: 4px 0 2px; font: 700 20px var(--sans); color: var(--ink); }
+.author-role { margin: 0; font: 400 14px/1.5 var(--sans); color: var(--muted); max-width: 62ch; }
+.author .btns { margin-top: 0; }
+.author .btn { display: inline-block; text-decoration: none; }
+.author .btn:hover { background: var(--accent); color: var(--accent-ink); }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Detective de Fallas: análisis de causa raíz con Python",
+  "description": "Juego de análisis de causa raíz en un parque eólico: investiga fallas con Python y pandas en el navegador, arma el diagrama de Ishikawa y entrega tu dictamen.",
+  "url": "https://cristianferspe-ui.github.io/cristianferspe-ui/proyectos/detective-de-fallas/",
+  "image": "https://cristianferspe-ui.github.io/cristianferspe-ui/proyectos/detective-de-fallas/og.png",
+  "inLanguage": "es-CL",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Navegador web",
+  "isAccessibleForFree": true,
+  "about": [
+    "Análisis de causa raíz",
+    "Energía eólica",
+    "Python",
+    "pandas",
+    "Diagrama de Ishikawa"
+  ],
+  "author": {
+    "@type": "Person",
+    "@id": "https://cristianferspe-ui.github.io/cristianferspe-ui/#persona",
+    "name": "Cristianfer Silva Portillo",
+    "url": "https://cristianferspe-ui.github.io/cristianferspe-ui/"
+  }
+}
+</script>
 </head>
 <body>
 
@@ -400,6 +436,21 @@ dialog::backdrop { background: rgba(5, 14, 17, .6); }
     </div>
   </section>
 </main>
+
+<footer class="author">
+  <div class="wrap author-inner">
+    <div>
+      <p class="author-k">Hecho por</p>
+      <p class="author-name">Cristianfer Silva Portillo</p>
+      <p class="author-role">Especialista de campo en parques eólicos · O&amp;M y puesta en marcha. 10 años diagnosticando fallas de aerogeneradores Siemens G2.101 e IMPSA IWP‑83.</p>
+    </div>
+    <div class="btns">
+      <a class="btn primary" href="../../CV_Cristianfer_Silva_Portillo.pdf" download data-goatcounter-click="cv-diseno-detective-de-fallas">Descargar CV ↓</a>
+      <a class="btn" href="../../#contacto">Contactar →</a>
+      <a class="btn" href="../../">Ver perfil completo</a>
+    </div>
+  </div>
+</footer>
 
 <dialog id="dRes"><div class="dlg" id="resBody"></div></dialog>
 

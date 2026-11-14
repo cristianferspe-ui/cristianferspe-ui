@@ -18,12 +18,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="styles.css?v=20261105">
+<link rel="stylesheet" href="styles.css?v=20261114">
 <script>
   // Aplica el tema guardado antes de pintar (evita el parpadeo claro/oscuro)
   try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
 </script>
-<script defer src="main.js?v=20261026"></script>
+<script defer src="main.js?v=20261114"></script>
 <!-- Datos estructurados: ayudan a Google a identificar a la persona, su cargo y sus perfiles -->
 <script type="application/ld+json">
 {
@@ -43,7 +43,20 @@
     "address": { "@type": "PostalAddress", "addressLocality": "Coquimbo", "addressCountry": "CL" },
     "alumniOf": [
       { "@type": "EducationalOrganization", "name": "Instituto Profesional AIEP" },
-      { "@type": "EducationalOrganization", "name": "CFT Juan Bohón" }
+      { "@type": "EducationalOrganization", "name": "CFT Juan Bohón" },
+      { "@type": "Organization", "name": "Siemens Gamesa Renewable Energy" },
+      { "@type": "Organization", "name": "IMPSA" }
+    ],
+    "hasOccupation": {
+      "@type": "Occupation",
+      "name": "Especialista de campo en parques eólicos (Field Service Engineer)",
+      "occupationLocation": { "@type": "Country", "name": "Chile" },
+      "skills": "Puesta en marcha de aerogeneradores, troubleshooting, análisis de causa raíz, confiabilidad, SCADA, PLC, convertidores de frecuencia, supervisión de cuadrillas"
+    },
+    "hasCredential": [
+      { "@type": "EducationalOccupationalCredential", "name": "GWO Basic Safety Training (BST)", "credentialCategory": "certificate", "recognizedBy": { "@type": "Organization", "name": "Global Wind Organisation" } },
+      { "@type": "EducationalOccupationalCredential", "name": "GWO Advanced Rescue Training (ART)", "credentialCategory": "certificate", "recognizedBy": { "@type": "Organization", "name": "Global Wind Organisation" } },
+      { "@type": "EducationalOccupationalCredential", "name": "Técnico de Nivel Superior en Energías Renovables y Eficiencia Energética", "credentialCategory": "degree", "recognizedBy": { "@type": "EducationalOrganization", "name": "CFT Juan Bohón" } }
     ],
     "knowsAbout": ["Energía eólica", "Operación y mantenimiento (O&M)", "Puesta en marcha", "Confiabilidad operacional", "Análisis de causa raíz", "PLC", "GRAFCET", "SCADA", "Seguridad de máquinas", "Python", "Convertidores de frecuencia"],
     "knowsLanguage": ["es", "en"],
@@ -506,6 +519,7 @@
           <a class="btn wa" href="#contacto" id="wa" target="_blank" rel="noopener">WhatsApp <span class="arr">→</span></a>
           <a class="btn" href="#contacto" id="tel">Teléfono</a>
           <a class="btn" href="https://www.linkedin.com/in/cristianfer-silva-portillo" target="_blank" rel="noopener" id="linkedin">LinkedIn <span class="arr">↗</span></a>
+          <a class="btn" href="#contacto" id="vcf" download="Cristianfer_Silva_Portillo.vcf" data-goatcounter-click="vcard" hidden>Guardar contacto <span class="arr">↓</span></a>
         </div>
       </div>
     </div>
