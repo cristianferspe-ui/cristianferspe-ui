@@ -1,6 +1,6 @@
 # Cristianfer Silva Portillo
 
-Especialista de campo en parques eólicos · O&M y puesta en marcha · 10 años en diagnóstico de fallas y confiabilidad de aerogeneradores · Ingeniero en Automatización y Control Industrial (titulación dic. 2026) · Coquimbo, Chile
+Ingeniero en Automatización y Control Industrial · Técnico de Nivel Superior en Energías Renovables y Eficiencia Energética · Especialista de campo en parques eólicos, O&M y puesta en marcha · 10 años en diagnóstico de fallas y confiabilidad de aerogeneradores · Coquimbo, Chile
 
 🌐 **Sitio web:** https://cristianferspe-ui.github.io/cristianferspe-ui/
 💼 **LinkedIn:** https://www.linkedin.com/in/cristianfer-silva-portillo

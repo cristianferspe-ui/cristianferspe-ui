@@ -51,7 +51,7 @@
         "BEGIN:VCARD", "VERSION:3.0",
         "N:Silva Portillo;Cristianfer;;;",
         "FN:Cristianfer Silva Portillo",
-        "TITLE:Especialista de campo en parques eólicos · O&M y puesta en marcha",
+        "TITLE:Ingeniero en Automatización y Control Industrial · Especialista de campo en parques eólicos",
         "TEL;TYPE=CELL:+" + n.join(""),
         "EMAIL;TYPE=INTERNET:cristianferspe@gmail.com",
         "URL:https://cristianferspe-ui.github.io/cristianferspe-ui/",
